@@ -1,0 +1,16 @@
+@import-normalize;
+
+#root {
+  min-height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* global class */
+
+.hide {
+  display: none !important;
+}
+.center {
+  text-align: center;
+}

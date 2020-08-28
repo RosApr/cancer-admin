@@ -1,0 +1,50 @@
+.site-layout-container {
+  min-height: 100vh;
+  .site-layout-side-bar {
+    position: fixed;
+    min-height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    .logo {
+      width: 66%;
+      margin: 0 auto;
+      height: 64px;
+      line-height: 64px;
+      img {
+        display: inline-block;
+        width: 100%;
+      }
+    }
+  }
+  .site-layout {
+    margin-left: 200px;
+    transition: margin 0.3s ease;
+    &.collapsed-content {
+      margin-left: 80px;
+    }
+    .site-layout-header {
+      background: #fff;
+      padding: 0;
+      .trigger {
+        font-size: 18px;
+        line-height: 64px;
+        padding: 0 16px;
+        cursor: pointer;
+        transition: color 0.3s;
+        &:hover {
+          color: #1890ff;
+        }
+      }
+      .logout-btn-container {
+        text-align: right;
+        margin-right: 16px;
+      }
+    }
+    .site-layout-content {
+      background: #fff;
+      margin: 24px 16px 0;
+      padding: 24px;
+    }
+  }
+}
