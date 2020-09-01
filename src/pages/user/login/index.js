@@ -49,7 +49,7 @@ export default function Login() {
     <Row className='login-layer' align='middle' justify='center'>
       <Col span={24}>
         <Title level={2} className='title'>
-          仁御口腔后台管理系统
+          江苏省肿瘤防治研究所
         </Title>
       </Col>
       <Col span={12} className='form-container'>

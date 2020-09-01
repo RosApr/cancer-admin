@@ -19,13 +19,8 @@
     "react": "^16.13.1",
     "react-app-polyfill": "^1.0.6",
     "react-dom": "^16.13.1",
-    "react-redux": "^7.2.1",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
-    "redux": "^4.0.5",
-    "redux-logger": "^3.0.6",
-    "redux-thunk": "^2.3.0",
-    "reselect": "^4.0.0",
     "sass": "^1.26.3",
     "typescript": "^3.8.3"
   },
@@ -75,7 +70,6 @@
     "json-server": "^0.15.1",
     "mockjs": "^1.1.0",
     "prettier": "^1.16.4",
-    "react-app-rewired": "^2.1.5",
-    "redux-logger": "^3.0.6"
+    "react-app-rewired": "^2.1.5"
   }
 }

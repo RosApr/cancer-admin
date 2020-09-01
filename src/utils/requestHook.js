@@ -1,9 +1,140 @@
-import { useState, useEffect } from 'react';
-import { message } from 'antd';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
-// import globalLoading from '@/components/globalLoading';
+import { message as Message } from 'antd';
 
-// const globalLoadingInstance = globalLoading();
+const initError = { status: 2, message: '' };
+
+export const useRequestResult = ({
+  response = null,
+  requestData = null,
+  error = { status: 0, message: '' },
+  cb = null,
+  messageTip = '',
+}) => {
+  useEffect(() => {
+    const { status, message = '' } = error;
+    if (status === 1) {
+      message &&
+        Message.error({
+          content: message,
+        });
+    } else if (status === 0) {
+      Message.success(messageTip || '操作成功').then(() => {
+        cb && cb(requestData, response);
+      });
+    }
+  }, [error, cb, requestData, messageTip, response]);
+};
+
+// post
+export const useRequest = (api = new Promise(resolve => resolve())) => {
+  /**
+   * @const {initError}
+   * status
+   * 2 => init
+   * 1 => error
+   * 0 => success
+   */
+  const [response, setResponse] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(initError);
+  const [requestData, setRequestData] = useState(null);
+  const init = () => {
+    setResponse(null);
+    setIsLoading(false);
+    setError(initError);
+    setRequestData(null);
+  };
+  const callApi = async (...params) => {
+    init();
+    try {
+      setIsLoading(true);
+      const response = await api(...params);
+      setResponse(response || null);
+      setRequestData(...params);
+      setError(prev => ({ ...prev, status: 0 }));
+    } catch (e) {
+      setError(prev => ({
+        ...prev,
+        status: 1,
+        message: e.data || '',
+      }));
+    }
+    setIsLoading(false);
+  };
+  return [{ response, error, isLoading, requestData }, callApi];
+};
+
+// get method
+export const useFetchDataOnMount = (
+  fetchDataApi = new Promise(resolve => resolve()),
+  initialState = null
+) => {
+  const initialStateMemo = useMemo(() => initialState, [initialState]);
+  const [response, setResponse] = useState(initialStateMemo);
+  const [error, setError] = useState(initError);
+  const [isLoading, setIsLoading] = useState(false);
+  // when api change reset default response error isloading
+  useEffect(() => {
+    setResponse(initialStateMemo);
+    setError(initError);
+    setIsLoading(false);
+  }, [fetchDataApi, initialStateMemo]);
+  useEffect(() => {
+    let didCancel = false;
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const data = await fetchDataApi();
+        setError(prev => ({ ...prev, status: 0 }));
+        if (!didCancel) {
+          setResponse(data || null);
+        }
+      } catch (e) {
+        setError(prev => ({ ...prev, status: 1, message: e['data'] || '' }));
+      }
+      if (!didCancel) {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+    return () => {
+      if (window.cancelRequest) {
+        didCancel = true;
+        window.cancelRequest && window.cancelRequest();
+      }
+    };
+  }, [fetchDataApi]);
+  return { response, error, isLoading };
+};
+
+export const useInitData = (fetchDataCallback = () => {}, isUpdate) => {
+  /**
+   * status 2 init
+   * status 1 not fetch
+   * status 0 fetch data
+   */
+  const [{ response }, fetchData] = useRequest(fetchDataCallback);
+  const [data, setData] = useState({ status: 2 });
+  const [isInit, setIsInit] = useState(false);
+
+  useEffect(() => {
+    if (isUpdate === null || isInit) return;
+    if (isUpdate) {
+      setIsInit(true);
+      fetchData();
+    } else {
+      setData({ data: null, status: 1 });
+    }
+  }, [isUpdate, fetchData, isInit, setIsInit, setData]);
+
+  useEffect(() => {
+    if (response) {
+      setData({ data: response, status: 0 });
+    }
+  }, [response, setData]);
+  return data;
+};
 
 export const useNavigate = () => {
   const history = useHistory();
@@ -14,107 +145,4 @@ export const useNavigate = () => {
     location,
     params,
   };
-};
-
-export const useRequestResult = ({
-  response,
-  requestData,
-  error,
-  cb = () => {},
-}) => {
-  useEffect(() => {
-    if (error.status === 1) {
-      message.error({
-        content: error.message,
-      });
-    } else if (error.status === 0) {
-      message.success('操作成功').then(() => {
-        cb(requestData);
-      });
-    }
-  }, [error, cb, requestData]);
-};
-
-// sync common api
-export const sync = async (
-  callback = new Promise(resolve => resolve()),
-  data = undefined,
-) => {
-  try {
-    await callback(data);
-    message.success({
-      content: '同步更新成功',
-    });
-  } catch (e) {
-    message.error({
-      content: e.message || '同步更新失败',
-    });
-  }
-};
-
-// post
-export const useRequest = (postDataApi = new Promise(resolve => resolve())) => {
-  const initError = { status: 2, message: '' };
-  const [response, setResponse] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(initError);
-  const [requestData, setRequestData] = useState(null);
-  const init = () => {
-    setResponse(null);
-    setIsLoading(false);
-    setError(initError);
-    // globalLoadingInstance.hide();
-  };
-  const post = async params => {
-    init();
-    try {
-      // globalLoadingInstance.show();
-      setIsLoading(true);
-      const response = await postDataApi(params);
-      setResponse(response);
-      setRequestData(params);
-      setError(prev => ({ ...prev, status: 0 }));
-    } catch (e) {
-      setError(prev => ({ ...prev, status: true, message: e.msg }));
-    }
-    // globalLoadingInstance.hide();
-    setIsLoading(false);
-  };
-  return [{ response, error, isLoading, requestData }, post];
-};
-
-// get method
-export const useFetchDataOnMount = (
-  fetchDataApi = new Promise(resolve => resolve()),
-  initialState = null,
-) => {
-  const [response, setResponse] = useState(initialState);
-  const [error, setError] = useState({ status: false, message: '' });
-  const [isLoading, setIsLoading] = useState(false);
-  useEffect(() => {
-    let didCancel = false;
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        setError(false);
-        const data = await fetchDataApi();
-        if (!didCancel) {
-          setResponse(data);
-        }
-      } catch (e) {
-        if (!didCancel) {
-          setError(prev => ({ ...prev, status: true, message: e.msg }));
-        }
-      }
-      if (!didCancel) {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-    return () => {
-      didCancel = true;
-      window.cancelRequest();
-    };
-  }, [fetchDataApi]);
-  return { response, error, isLoading };
 };

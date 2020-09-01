@@ -25,29 +25,20 @@ service.interceptors.request.use(
   },
   error => {
     return Promise.reject(error);
-  },
+  }
 );
 service.interceptors.response.use(
   response => {
-    const { code, msg, data } = response.data;
-    const { status } = response;
-    const isOtherPlatformRequest = response.config.url.startsWith(
-      SPECIAL_REQUEST_URL,
-    );
+    const { status, data } = response;
     globalLoadingInstance.hide();
-    if (code !== 0 && !isOtherPlatformRequest) {
-      // show tip model
-      // todo
-
+    if (status === 401) {
       // no permession to access -> navigate to login page
-      if (status === 401) {
-        // todo
-        window.location.href = '/login';
-      }
-
-      return Promise.reject({ code, msg });
-    } else {
+      window.location.href = '/login';
+    }
+    if (status === 200) {
       return Promise.resolve(data);
+    } else {
+      return Promise.reject(data);
     }
   },
   error => {
@@ -71,14 +62,11 @@ service.interceptors.response.use(
       window.location.href = window.location.origin + '/#/500';
     }
     return Promise.reject(data);
-  },
+  }
 );
 
 export default params => {
   return service({
     ...params,
-    ...(!params.url.startsWith(SPECIAL_REQUEST_URL)
-      ? { url: `/admin${params.url}` }
-      : {}),
   });
 };
