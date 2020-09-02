@@ -111,13 +111,15 @@ const filterFormConfig = [
   },
 ];
 
+const projectListConfig = {
+  list: [],
+  total: 0,
+};
+
 export default function Dashboard() {
   const { history } = useNavigate();
 
-  const [projectList, setProjectList] = useState({
-    list: [],
-    total: 0,
-  });
+  const [projectList, setProjectList] = useState(() => projectListConfig);
   const [current, setCurrent] = useState(1);
   const [init, setInit] = useState(false);
 
@@ -136,9 +138,10 @@ export default function Dashboard() {
       const cancerSelect = filterFormConfig.filter(
         item => item.key === 'cancer_id'
       )[0];
-      cancerSelect['list'] = fetchCancerListResponse;
-      cancerSelect['defaultValue'] = fetchCancerListResponse[0]['id'];
-      cancerSelect['value'] = fetchCancerListResponse[0]['id'];
+      cancerSelect['list'] = [
+        { id: '', name: '全部' },
+        ...fetchCancerListResponse,
+      ];
       setTableFilter(initTableFilterConfig(filterFormConfig));
     }
   }, [fetchCancerListResponse, fetchCancerListError]);
@@ -156,6 +159,8 @@ export default function Dashboard() {
         return formatFilters;
       });
       setInit(false);
+      setCurrent(1);
+      setProjectList(projectListConfig);
     },
     [setTableFilter]
   );
@@ -177,7 +182,6 @@ export default function Dashboard() {
   ] = useRequest(fetchProjectListCallback);
   useEffect(() => {
     if (fetchProjectListError.status === 0 && fetchProjectListResponse) {
-      console.log(fetchProjectListResponse);
       const list = fetchProjectListResponse;
       setProjectList({
         list: list,
