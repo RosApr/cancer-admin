@@ -139,7 +139,7 @@ export default function Dashboard() {
         item => item.key === 'cancer_id'
       )[0];
       cancerSelect['list'] = [
-        { id: '', name: '全部' },
+        { id: 0, name: '全部' },
         ...fetchCancerListResponse,
       ];
       setTableFilter(initTableFilterConfig(filterFormConfig));
