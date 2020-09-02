@@ -205,13 +205,9 @@ export default function Dashboard() {
     return history.push(`/app/project/`);
   };
   const goView = (cancerId, projectId) => {
-    console.log(cancerId);
-    console.log(projectId);
     return history.push(`/app/project/${cancerId}/${projectId}`);
   };
   const goEdit = (cancerId, projectId) => {
-    console.log(cancerId);
-    console.log(projectId);
     return history.push(`/app/project/update/${cancerId}/${projectId}`);
   };
   const del = projectId => {

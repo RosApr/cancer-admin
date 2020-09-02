@@ -11,7 +11,7 @@ import { ROLE_USER, ROLE_ADMIN, ROLE_ANONYMOUS } from '@/utils/consts.js';
 export const routeMap = [
   // home
   {
-    path: '/app/project',
+    path: '/app/project/index',
     main: lazy(() => import('@/pages/project/index/index')),
     role: [ROLE_USER],
     state: { meta: '项目管理' },

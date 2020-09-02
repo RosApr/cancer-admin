@@ -30,7 +30,6 @@ export default function Login() {
     //   data: { role = '', token = '' },
     // } = response;
     if (true) {
-      console.log(token);
       // if (response) {
       // set token
       setTokenToCookie(token);
