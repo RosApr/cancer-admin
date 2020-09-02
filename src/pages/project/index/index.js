@@ -21,6 +21,7 @@ const makeTableColumns = (
     title: 'id',
     dataIndex: 'id',
     align: 'center',
+    width: 50,
   },
   {
     title: '项目描述',
@@ -32,29 +33,34 @@ const makeTableColumns = (
     title: '负责医生',
     dataIndex: 'doctor',
     align: 'center',
+    width: 120,
     render: input => input || '等待回填',
   },
   {
     title: '项目人数',
     dataIndex: 'count',
     align: 'center',
+    width: 120,
     render: input => input || '等待回填',
   },
   {
     title: '创建日期',
     dataIndex: 'created',
     align: 'center',
+    width: 150,
     render: input => input || '等待回填',
   },
   {
     title: '更新日期',
     dataIndex: 'updated',
     align: 'center',
+    width: 150,
     render: input => input || '等待回填',
   },
   {
     title: '操作',
     dataIndex: 'id',
+    width: 280,
     render: (id, { cancer: { id: cancerId } }) => {
       return (
         <Space size='middle'>
@@ -83,10 +89,10 @@ const filterFormConfig = [
   {
     key: 'cancer_id',
     list: [],
-    defaultValue: '',
+    defaultValue: 0,
     placeholder: '请选择癌症',
     isFullMatch: true,
-    value: '',
+    value: 0,
   },
   {
     key: 'description',

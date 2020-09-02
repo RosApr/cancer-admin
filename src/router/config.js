@@ -19,14 +19,14 @@ export const routeMap = [
     menuIcon: HomeOutlined,
   },
   {
-    path: '/app/project/update/:cancerId/:projectId',
+    path: '/app/project/update/:cancer_id/:project_id',
     main: lazy(() => import('@/pages/project/edit/index')),
     role: [ROLE_USER],
     state: { meta: '项目' },
     isInMenu: !1,
   },
   {
-    path: '/app/project/:cancerId/:projectId',
+    path: '/app/project/:cancerId/:project_id',
     main: lazy(() => import('@/pages/project/view/index')),
     role: [ROLE_USER],
     state: { meta: '项目' },

@@ -57,7 +57,7 @@ export const useRequest = (api = new Promise(resolve => resolve())) => {
       setError(prev => ({
         ...prev,
         status: 1,
-        message: e.data || '',
+        message: e.msg || '',
       }));
     }
     setIsLoading(false);
