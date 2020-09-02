@@ -21,13 +21,19 @@ const { Title } = Typography;
 export default function Login() {
   const { history, location } = useNavigate();
 
-  const [{ response, error, requestData }, login] = useRequest(loginApi);
+  // const [{ response, error, requestData }, login] = useRequest(loginApi);
+  const [{ response, error, requestData }, login] = useRequest(() => {});
   const loginCb = useCallback(() => {
     const { username } = requestData;
-    const { role = '' } = response;
-    if (response) {
+    const { role, token } = { token: 'aaa' };
+    // const {
+    //   data: { role = '', token = '' },
+    // } = response;
+    if (true) {
+      console.log(token);
+      // if (response) {
       // set token
-      setTokenToCookie(response.token);
+      setTokenToCookie(token);
       // set user role
       let _role = '';
       if (username === ACCOUNT_USER) {
@@ -44,6 +50,7 @@ export default function Login() {
       history.replace(nextPath);
     }
   }, [response, history, location, requestData]);
+
   useRequestResult({ response, error, cb: loginCb });
   return (
     <Row className='login-layer' align='middle' justify='center'>

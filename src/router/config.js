@@ -11,12 +11,26 @@ import { ROLE_USER, ROLE_ADMIN, ROLE_ANONYMOUS } from '@/utils/consts.js';
 export const routeMap = [
   // home
   {
-    path: '/app/dashboard',
-    main: lazy(() => import('@/pages/dashboard/index/index')),
+    path: '/app/project',
+    main: lazy(() => import('@/pages/project/index/index')),
     role: [ROLE_USER],
     state: { meta: '项目管理' },
     isInMenu: !!1,
     menuIcon: HomeOutlined,
+  },
+  {
+    path: '/app/project/update/:cancerId/:projectId',
+    main: lazy(() => import('@/pages/project/edit/index')),
+    role: [ROLE_USER],
+    state: { meta: '项目' },
+    isInMenu: !1,
+  },
+  {
+    path: '/app/project/:cancerId/:projectId',
+    main: lazy(() => import('@/pages/project/view/index')),
+    role: [ROLE_USER],
+    state: { meta: '项目' },
+    isInMenu: !1,
   },
   {
     path: '/login',

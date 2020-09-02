@@ -55,11 +55,11 @@ const makeTableColumns = (
   {
     title: '操作',
     dataIndex: 'id',
-    render: id => {
+    render: (id, { cancer: { id: cancerId } }) => {
       return (
         <Space size='middle'>
-          <Button onClick={() => goView(id)}>查看</Button>
-          <Button type='primary' onClick={() => goEdit(id)}>
+          <Button onClick={() => goView(cancerId, id)}>查看</Button>
+          <Button type='primary' onClick={() => goEdit(cancerId, id)}>
             编辑
           </Button>
           <Popconfirm
@@ -202,9 +202,22 @@ export default function Dashboard() {
   }, [tableFilter, init, fetchProjectList]);
 
   const goAdd = () => {
-    return history.push(`/app/solution/basic/add`);
+    return history.push(`/app/project/`);
   };
-  const tableColumns = makeTableColumns();
+  const goView = (cancerId, projectId) => {
+    console.log(cancerId);
+    console.log(projectId);
+    return history.push(`/app/project/${cancerId}/${projectId}`);
+  };
+  const goEdit = (cancerId, projectId) => {
+    console.log(cancerId);
+    console.log(projectId);
+    return history.push(`/app/project/update/${cancerId}/${projectId}`);
+  };
+  const del = projectId => {
+    console.log(projectId);
+  };
+  const tableColumns = makeTableColumns(goEdit, goView, del);
   return (
     <div className='dashboard-layer'>
       {fetchCancerListResponse && tableFilter && (
