@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Button, Row, Col, Table } from 'antd';
+import { Button, Table, Space, Popconfirm } from 'antd';
 import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
 import { fetchCancersApi } from '@/api/cancer';
@@ -11,7 +11,73 @@ import {
 } from '@/utils/requestHook';
 import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
 import './index.scss';
-import { set } from 'js-cookie';
+
+const makeTableColumns = (
+  goEdit = () => {},
+  goView = () => {},
+  del = () => {}
+) => [
+  {
+    title: 'id',
+    dataIndex: 'id',
+    align: 'center',
+  },
+  {
+    title: '项目描述',
+    dataIndex: 'description',
+    align: 'left',
+    render: input => input || '等待回填',
+  },
+  {
+    title: '负责医生',
+    dataIndex: 'doctor',
+    align: 'center',
+    render: input => input || '等待回填',
+  },
+  {
+    title: '项目人数',
+    dataIndex: 'count',
+    align: 'center',
+    render: input => input || '等待回填',
+  },
+  {
+    title: '创建日期',
+    dataIndex: 'created',
+    align: 'center',
+    render: input => input || '等待回填',
+  },
+  {
+    title: '更新日期',
+    dataIndex: 'updated',
+    align: 'center',
+    render: input => input || '等待回填',
+  },
+  {
+    title: '操作',
+    dataIndex: 'id',
+    render: id => {
+      return (
+        <Space size='middle'>
+          <Button onClick={() => goView(id)}>查看</Button>
+          <Button type='primary' onClick={() => goEdit(id)}>
+            编辑
+          </Button>
+          <Popconfirm
+            onConfirm={() => del(id)}
+            placement='bottomRight'
+            cancelText='取消'
+            okText='确认'
+            title={`确认要删除${id}号项目吗？`}
+          >
+            <Button type='danger'>删除</Button>
+          </Popconfirm>
+        </Space>
+      );
+    },
+    fixed: 'right',
+    width: 360,
+  },
+];
 
 const filterFormConfig = [
   {
@@ -48,7 +114,11 @@ const filterFormConfig = [
 export default function Dashboard() {
   const { history } = useNavigate();
 
-  const [projectList, setProjectList] = useState([]);
+  const [projectList, setProjectList] = useState({
+    list: [],
+    total: 0,
+  });
+  const [current, setCurrent] = useState(1);
   const [init, setInit] = useState(false);
 
   const fetchCancerListCallback = useCallback(() => {
@@ -105,17 +175,20 @@ export default function Dashboard() {
     },
     fetchProjectList,
   ] = useRequest(fetchProjectListCallback);
-
   useEffect(() => {
     if (fetchProjectListError.status === 0 && fetchProjectListResponse) {
       console.log(fetchProjectListResponse);
-      // const { items, total } = fetchProjectListResponse;
-      // setProjectList(prev => ({
-      //   list: [...prev.list, ...items],
-      //   total: total,
-      // }));
+      const list = fetchProjectListResponse;
+      setProjectList({
+        list: list,
+        total: list.length || 0,
+      });
     }
   }, [fetchProjectListError, fetchProjectListResponse]);
+
+  const handlePageChange = e => {
+    setCurrent(e);
+  };
 
   useEffect(() => {
     if (tableFilter && !init) {
@@ -127,6 +200,7 @@ export default function Dashboard() {
   const goAdd = () => {
     return history.push(`/app/solution/basic/add`);
   };
+  const tableColumns = makeTableColumns();
   return (
     <div className='dashboard-layer'>
       {fetchCancerListResponse && tableFilter && (
@@ -148,6 +222,22 @@ export default function Dashboard() {
           }}
         />
       )}
+      <Table
+        loading={fetchProjectListLoading}
+        rowKey='id'
+        bordered
+        columns={tableColumns}
+        dataSource={projectList.list}
+        className='table'
+        pagination={{
+          current: current,
+          pageSize: 10,
+          total: projectList.total,
+          showSizeChanger: false,
+          hideOnSinglePage: true,
+          onChange: handlePageChange,
+        }}
+      ></Table>
     </div>
   );
 }
