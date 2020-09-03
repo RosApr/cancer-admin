@@ -20,36 +20,41 @@ const { Title } = Typography;
 
 export default function Login() {
   const { history, location } = useNavigate();
-
+  const [loginForm] = Form.useForm();
   const [{ response, error, requestData }, login] = useRequest(loginApi);
   const loginCb = useCallback(() => {
-    const { username } = requestData;
-    // const { role, token } = { token: 'aaa' };
-    console.log(response);
-    // const {
-    //   data: { role = '', token = '' },
-    // } = response;
-    // if (true) {
-    // if (response) {
-    //   // set token
-    //   setTokenToCookie(token);
-    //   // set user role
-    //   let _role = '';
-    //   if (username === ACCOUNT_USER) {
-    //     _role = ROLE_USER;
-    //   } else if (username === ACCOUNT_ADMIN) {
-    //     _role = ROLE_ADMIN;
-    //   }
-    //   setUserRoleToCookie(role || _role);
-    //   // navigate
-    //   let nextPath = '/';
-    //   if (location.state) {
-    //     nextPath = location.state.from.pathname;
-    //   }
-    //   history.replace(nextPath);
-    // }
+    const { access_toke } = response;
+    if (response) {
+      // set token
+      setTokenToCookie(access_toke);
+      // set user role
+      let _role = '';
+      // if (username === ACCOUNT_USER) {
+      _role = ROLE_USER;
+      // } else if (username === ACCOUNT_ADMIN) {
+      // _role = ROLE_ADMIN;
+      // }
+      setUserRoleToCookie(_role);
+      // setUserRoleToCookie(role || _role);
+      // navigate
+      let nextPath = '/';
+      if (location.state) {
+        nextPath = location.state.from.pathname;
+      }
+      history.replace(nextPath);
+    }
   }, [response, history, location, requestData]);
 
+  const handleSubmit = () => {
+    loginForm
+      .validateFields()
+      .then(async values => {
+        // name field is untouched and not empty or in edit
+        // and name equal edit init name
+        return login(values);
+      })
+      .catch(error => {});
+  };
   useRequestResult({ response, error, cb: loginCb });
   return (
     <Row className='login-layer' align='middle' justify='center'>
@@ -59,7 +64,7 @@ export default function Login() {
         </Title>
       </Col>
       <Col span={12} className='form-container'>
-        <Form size='large' {...layout} name='loginForm' onFinish={login}>
+        <Form size='large' {...layout} form={loginForm} name='loginForm'>
           <Form.Item
             name='username'
             rules={[{ required: true, message: '请输入用户名!' }]}
@@ -73,7 +78,7 @@ export default function Login() {
             <Input.Password prefix={<LockOutlined />} placeholder='密码' />
           </Form.Item>
           <Form.Item>
-            <Button type='primary' htmlType='submit' block>
+            <Button type='primary' block onClick={handleSubmit}>
               登录
             </Button>
           </Form.Item>

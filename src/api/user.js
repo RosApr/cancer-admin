@@ -3,7 +3,7 @@ import request from '@/utils/request';
 export function login(data) {
   return request({
     // url: `${process.env.REACT_APP_REQUEST_BASE_MOCK_URL}/user/login`,
-    url: `${process.env.REACT_APP_REQUEST_BASE_URL}/login`,
+    url: `${process.env.REACT_APP_REQUEST_BASE_URL}/backend/login`,
     method: 'post',
     data,
   });

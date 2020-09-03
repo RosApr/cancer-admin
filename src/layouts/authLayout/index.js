@@ -20,7 +20,7 @@ export default function LayoutComponent() {
   const userRole = getUserRoleFromCookie();
   // routes map
   const requireAuthRoutes = routeMap.filter(({ role }) =>
-    role.includes(userRole),
+    role.includes(userRole)
   );
   const defaultRoute = requireAuthRoutes[0];
   // side bar map
@@ -58,7 +58,7 @@ export default function LayoutComponent() {
                 {
                   className: 'trigger',
                   onClick: toggle,
-                },
+                }
               )}
             </Col>
             <Col flex='120px' className='logout-btn-container'>
