@@ -15,7 +15,7 @@ service.interceptors.request.use(
   config => {
     const token = getTokenFromCookie();
     if (token) {
-      config.headers['X-Token'] = token;
+      config.headers['Authorization'] = token;
     }
     config.cancelToken = new CancelToken(function(c) {
       window.cancelRequest = c;
