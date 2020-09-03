@@ -21,33 +21,33 @@ const { Title } = Typography;
 export default function Login() {
   const { history, location } = useNavigate();
 
-  // const [{ response, error, requestData }, login] = useRequest(loginApi);
-  const [{ response, error, requestData }, login] = useRequest(() => {});
+  const [{ response, error, requestData }, login] = useRequest(loginApi);
   const loginCb = useCallback(() => {
     const { username } = requestData;
-    const { role, token } = { token: 'aaa' };
+    // const { role, token } = { token: 'aaa' };
+    console.log(response);
     // const {
     //   data: { role = '', token = '' },
     // } = response;
-    if (true) {
-      // if (response) {
-      // set token
-      setTokenToCookie(token);
-      // set user role
-      let _role = '';
-      if (username === ACCOUNT_USER) {
-        _role = ROLE_USER;
-      } else if (username === ACCOUNT_ADMIN) {
-        _role = ROLE_ADMIN;
-      }
-      setUserRoleToCookie(role || _role);
-      // navigate
-      let nextPath = '/';
-      if (location.state) {
-        nextPath = location.state.from.pathname;
-      }
-      history.replace(nextPath);
-    }
+    // if (true) {
+    // if (response) {
+    //   // set token
+    //   setTokenToCookie(token);
+    //   // set user role
+    //   let _role = '';
+    //   if (username === ACCOUNT_USER) {
+    //     _role = ROLE_USER;
+    //   } else if (username === ACCOUNT_ADMIN) {
+    //     _role = ROLE_ADMIN;
+    //   }
+    //   setUserRoleToCookie(role || _role);
+    //   // navigate
+    //   let nextPath = '/';
+    //   if (location.state) {
+    //     nextPath = location.state.from.pathname;
+    //   }
+    //   history.replace(nextPath);
+    // }
   }, [response, history, location, requestData]);
 
   useRequestResult({ response, error, cb: loginCb });
