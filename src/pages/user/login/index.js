@@ -21,7 +21,7 @@ const { Title } = Typography;
 export default function Login() {
   const { history, location } = useNavigate();
   const [loginForm] = Form.useForm();
-  const [{ response, error, requestData }, login] = useRequest(loginApi);
+  const [{ response, error }, login] = useRequest(loginApi);
   const loginCb = useCallback(() => {
     const { access_toke } = response;
     if (response) {
@@ -43,7 +43,7 @@ export default function Login() {
       }
       history.replace(nextPath);
     }
-  }, [response, history, location, requestData]);
+  }, [response, history, location]);
 
   const handleSubmit = () => {
     loginForm

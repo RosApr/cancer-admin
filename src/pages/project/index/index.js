@@ -31,28 +31,35 @@ const makeTableColumns = (
   },
   {
     title: '负责医生',
-    dataIndex: 'doctor',
+    dataIndex: 'person_in_charge',
     align: 'center',
     width: 120,
     render: input => input || '等待回填',
   },
   {
-    title: '项目人数',
-    dataIndex: 'count',
+    title: '提交人数',
+    dataIndex: 'submit_patients_num',
     align: 'center',
     width: 120,
-    render: input => input || '等待回填',
+    render: input => input || 0,
+  },
+  {
+    title: '入组人数',
+    dataIndex: 'accept_patients_num',
+    align: 'center',
+    width: 120,
+    render: input => input || 0,
   },
   {
     title: '创建日期',
-    dataIndex: 'created',
+    dataIndex: 'create_time',
     align: 'center',
     width: 150,
     render: input => input || '等待回填',
   },
   {
     title: '更新日期',
-    dataIndex: 'updated',
+    dataIndex: 'update_time',
     align: 'center',
     width: 150,
     render: input => input || '等待回填',
@@ -81,7 +88,6 @@ const makeTableColumns = (
       );
     },
     fixed: 'right',
-    width: 360,
   },
 ];
 
