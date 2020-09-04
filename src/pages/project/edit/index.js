@@ -5,6 +5,7 @@ import {
   updateProjectCheckApi,
   updateProjectConfigApi,
 } from '@/api/project';
+import { getDoctorListApi } from '@/api/doctor';
 import {
   useNavigate,
   useFetchDataOnMount,
@@ -17,7 +18,7 @@ import './index.scss';
 const { TextArea } = Input;
 const { Item } = Form;
 
-const textareaConfig = { minRows: 4, minRows: 8 };
+const textareaConfig = { minRows: 4 };
 const initialFormData = {
   acceptance: '',
   exclusion: '',
@@ -29,6 +30,22 @@ export default function ProjectForm() {
   const { params, history } = useNavigate();
 
   const [form] = Form.useForm();
+  const [doctorList, setDoctorList] = useState([]);
+
+  const fetchDoctorCallback = useCallback(() => {
+    return getDoctorListApi();
+  }, []);
+  const {
+    response: fetchDoctorResponse,
+    error: fetchDoctorError,
+  } = useFetchDataOnMount(fetchDoctorCallback);
+
+  useEffect(() => {
+    if (fetchDoctorResponse && fetchDoctorError.status === 0) {
+      setDoctorList(fetchDoctorResponse);
+    }
+  }, [fetchDoctorResponse, fetchDoctorError]);
+
   const [formInitialData, setFormInitialData] = useState(null);
 
   const fetchProjectCallback = useCallback(() => {
