@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { Tag, Button, Input } from 'antd';
+import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { fetchProjectDetailApi } from '@/api/project';
 import { useFetchDataOnMount, useNavigate } from '@/utils/requestHook';
 import DetailItem from '@/components/detailItem';
@@ -55,6 +56,17 @@ export default function ProjectView() {
           </DetailItem>
           <DetailItem label='申请人数'>
             {responseMemo.submit_patients_num}人
+          </DetailItem>
+          <DetailItem label='项目进度'>
+            {responseMemo.progress === 0 ? (
+              <Tag icon={<SyncOutlined spin />} color='processing'>
+                正在进行
+              </Tag>
+            ) : (
+              <Tag icon={<MinusCircleOutlined />} color='cyan'>
+                已归档
+              </Tag>
+            )}
           </DetailItem>
           <DetailItem label='配置'>
             <TextArea

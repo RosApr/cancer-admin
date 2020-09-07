@@ -9,7 +9,7 @@ import {
 import { ROLE_USER, ROLE_ADMIN, ROLE_ANONYMOUS } from '@/utils/consts.js';
 
 export const routeMap = [
-  // home
+  // 列表
   {
     path: '/app/project/index',
     main: lazy(() => import('@/pages/project/index/index')),
@@ -18,6 +18,7 @@ export const routeMap = [
     isInMenu: !!1,
     menuIcon: HomeOutlined,
   },
+  // 更新
   {
     path: '/app/project/update/:cancer_id/:project_id',
     main: lazy(() => import('@/pages/project/edit/index')),
@@ -25,13 +26,15 @@ export const routeMap = [
     state: { meta: '项目' },
     isInMenu: !1,
   },
+  // 详情
   {
-    path: '/app/project/:cancer_id/:project_id',
+    path: '/app/project/:cancer_id/:project_id?',
     main: lazy(() => import('@/pages/project/view/index')),
     role: [ROLE_USER],
     state: { meta: '项目' },
     isInMenu: !1,
   },
+  // 登录
   {
     path: '/login',
     main: lazy(() => import('@/pages/user/login/index')),
