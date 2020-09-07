@@ -26,7 +26,7 @@ export const routeMap = [
     isInMenu: !1,
   },
   {
-    path: '/app/project/:cancerId/:project_id',
+    path: '/app/project/:cancer_id/:project_id',
     main: lazy(() => import('@/pages/project/view/index')),
     role: [ROLE_USER],
     state: { meta: '项目' },

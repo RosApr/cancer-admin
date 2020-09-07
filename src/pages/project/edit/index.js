@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Button, Input, Form, Space } from 'antd';
+import { Button, Input, Form, Space, Select, Tag } from 'antd';
 import {
   fetchProjectDetailApi,
   updateProjectCheckApi,
@@ -16,6 +16,7 @@ import { FORM_ITEM_LAYOUT } from '@/utils/consts';
 import './index.scss';
 
 const { TextArea } = Input;
+const { Option } = Select;
 const { Item } = Form;
 
 const textareaConfig = { minRows: 4 };
@@ -24,6 +25,7 @@ const initialFormData = {
   exclusion: '',
   description: '',
   check_criterion: '',
+  person_in_charge: '',
 };
 
 export default function ProjectForm() {
@@ -40,12 +42,6 @@ export default function ProjectForm() {
     error: fetchDoctorError,
   } = useFetchDataOnMount(fetchDoctorCallback);
 
-  useEffect(() => {
-    if (fetchDoctorResponse && fetchDoctorError.status === 0) {
-      setDoctorList(fetchDoctorResponse);
-    }
-  }, [fetchDoctorResponse, fetchDoctorError]);
-
   const [formInitialData, setFormInitialData] = useState(null);
 
   const fetchProjectCallback = useCallback(() => {
@@ -57,7 +53,13 @@ export default function ProjectForm() {
   } = useFetchDataOnMount(fetchProjectCallback);
 
   useEffect(() => {
-    if (fetchProjectResponse && fetchProjectError.status === 0) {
+    if (
+      fetchProjectResponse &&
+      fetchProjectError.status === 0 &&
+      fetchDoctorResponse &&
+      fetchDoctorError.status === 0
+    ) {
+      setDoctorList(fetchDoctorResponse);
       setFormInitialData({
         ...initialFormData,
         ...fetchProjectResponse,
@@ -68,7 +70,12 @@ export default function ProjectForm() {
         ),
       });
     }
-  }, [fetchProjectResponse, fetchProjectError]);
+  }, [
+    fetchProjectResponse,
+    fetchProjectError,
+    fetchDoctorResponse,
+    fetchDoctorError,
+  ]);
 
   const goProjectList = () => history.push('/app/project/index');
 
@@ -104,7 +111,7 @@ export default function ProjectForm() {
 
   return (
     <div className='dashboard-layer'>
-      {formInitialData && (
+      {formInitialData && doctorList.length > 0 && (
         <Form
           form={form}
           name='Form'
@@ -112,31 +119,42 @@ export default function ProjectForm() {
           {...FORM_ITEM_LAYOUT}
           initialValues={formInitialData}
         >
+          <Item name='person_in_charge' label='负责医生'>
+            <Select>
+              {doctorList.map(({ name, position, telphone, visit_time }) => (
+                <Option value={name} key={name}>
+                  {name} | <Tag color='blue'>{position}</Tag>
+                  {telphone ? ` | ${telphone}` : ''}
+                  {visit_time ? ` |  门诊时间：${visit_time}` : ''}
+                </Option>
+              ))}
+            </Select>
+          </Item>
           <Item
             label='入组标准'
             name='acceptance'
-            rules={[{ required: true, message: '请填写名称' }]}
+            rules={[{ required: true, message: '请填写入组标准' }]}
           >
             <TextArea autoSize={textareaConfig} />
           </Item>
           <Item
-            label='描述'
+            label='项目描述'
             name='description'
-            rules={[{ required: true, message: '请填写名称' }]}
+            rules={[{ required: true, message: '请填写项目描述' }]}
           >
             <TextArea autoSize={textareaConfig} />
           </Item>
           <Item
             label='排除标准'
             name='exclusion'
-            rules={[{ required: true, message: '请填写名称' }]}
+            rules={[{ required: true, message: '请填写排除标准' }]}
           >
             <TextArea autoSize={textareaConfig} />
           </Item>
           <Item
-            label='名称'
+            label='配置'
             name='check_criterion'
-            rules={[{ required: true, message: '请填写名称' }]}
+            rules={[{ required: true, message: '请填写配置' }]}
           >
             <TextArea autoSize={textareaConfig} />
           </Item>

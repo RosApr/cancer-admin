@@ -1,0 +1,18 @@
+.detail-item {
+  margin-bottom: 10px;
+  line-height: 2;
+  .label {
+    font-size: 16px;
+    text-align: right;
+    .icon {
+      color: red;
+    }
+  }
+  .value {
+    padding-left: 20px;
+    font-size: 16px;
+  }
+  .single-child {
+    text-align: center;
+  }
+}
