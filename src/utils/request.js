@@ -1,6 +1,5 @@
 import Axios from 'axios';
 import { getTokenFromCookie } from './cookie';
-import { SPECIAL_REQUEST_URL } from './consts';
 import globalLoading from '@/components/globalLoading';
 
 const globalLoadingInstance = globalLoading();

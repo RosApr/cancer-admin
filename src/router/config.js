@@ -18,9 +18,9 @@ export const routeMap = [
     isInMenu: !!1,
     menuIcon: HomeOutlined,
   },
-  // 更新
+  // 更新|新增
   {
-    path: '/app/project/update/:cancer_id/:project_id',
+    path: '/app/project/:operationType/:cancer_id?/:project_id?',
     main: lazy(() => import('@/pages/project/edit/index')),
     role: [ROLE_USER],
     state: { meta: '项目' },
@@ -28,7 +28,7 @@ export const routeMap = [
   },
   // 详情
   {
-    path: '/app/project/:cancer_id/:project_id?',
+    path: '/app/project/:cancer_id/:project_id',
     main: lazy(() => import('@/pages/project/view/index')),
     role: [ROLE_USER],
     state: { meta: '项目' },

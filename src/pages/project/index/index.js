@@ -213,8 +213,8 @@ export default function Dashboard() {
     }
   }, [tableFilter, init, fetchProjectList]);
 
-  const goAdd = () => {
-    return history.push(`/app/project/`);
+  const goAdd = cancerId => {
+    return history.push(`/app/project/add/${cancerId}`);
   };
   const goView = (cancerId, projectId) => {
     return history.push(`/app/project/${cancerId}/${projectId}`);
