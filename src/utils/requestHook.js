@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { message as Message } from 'antd';
-
+import { FORM_STATUS } from '@/utils/consts';
 const initError = { status: 2, message: '' };
 
 export const useRequestResult = ({
@@ -145,4 +145,12 @@ export const useNavigate = () => {
     location,
     params,
   };
+};
+
+export const useReturnCurrentFormStatus = operationType => {
+  const [isUpdate, setIsUpdate] = useState(null);
+  useEffect(() => {
+    setIsUpdate(FORM_STATUS[operationType]);
+  }, [operationType]);
+  return isUpdate;
 };

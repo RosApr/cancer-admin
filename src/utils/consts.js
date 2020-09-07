@@ -11,3 +11,8 @@ export const FORM_ITEM_LAYOUT = {
   labelCol: { span: 8 },
   wrapperCol: { span: 10 },
 };
+
+export const FORM_STATUS = {
+  add: false,
+  update: true,
+};

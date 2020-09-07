@@ -6,6 +6,7 @@ import {
   updateProjectConfigApi,
 } from '@/api/project';
 import { getDoctorListApi } from '@/api/doctor';
+import { fetchCancersApi } from '@/api/cancer';
 import {
   useNavigate,
   useFetchDataOnMount,
@@ -13,6 +14,7 @@ import {
   useRequestResult,
 } from '@/utils/requestHook';
 import { FORM_ITEM_LAYOUT } from '@/utils/consts';
+import { useReturnCurrentFormStatus } from '@/utils/requestHook';
 import './index.scss';
 
 const { TextArea } = Input;
@@ -31,12 +33,17 @@ const initialFormData = {
 export default function ProjectForm() {
   const { params, history } = useNavigate();
 
+  const isUpdate = useReturnCurrentFormStatus(params.operationType);
+
+  const [init, setInit] = useState(false);
+
   const [form] = Form.useForm();
   const [doctorList, setDoctorList] = useState([]);
 
   const fetchDoctorCallback = useCallback(() => {
     return getDoctorListApi();
   }, []);
+
   const {
     response: fetchDoctorResponse,
     error: fetchDoctorError,
@@ -47,10 +54,30 @@ export default function ProjectForm() {
   const fetchProjectCallback = useCallback(() => {
     return fetchProjectDetailApi(params);
   }, [params]);
-  const {
-    response: fetchProjectResponse,
-    error: fetchProjectError,
-  } = useFetchDataOnMount(fetchProjectCallback);
+
+  const [
+    { response: fetchProjectResponse, error: fetchProjectError },
+    fetchProject,
+  ] = useRequest(fetchProjectCallback);
+
+  const fetchCacnerCallback = useCallback(() => {
+    return fetchCancersApi(params);
+  }, [params]);
+
+  const [
+    { response: fetchCancerResponse, error: fetchCancerError },
+    fetchCancer,
+  ] = useRequest(fetchCacnerCallback);
+
+  useEffect(() => {
+    if (isUpdate !== null && isUpdate && !init) {
+      setInit(true);
+      fetchProject();
+    } else if (isUpdate !== null && !isUpdate && !init) {
+      setInit(true);
+      fetchCancer();
+    }
+  }, [isUpdate, fetchProject, fetchCancer, init]);
 
   useEffect(() => {
     if (

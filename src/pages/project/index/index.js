@@ -192,6 +192,7 @@ export default function Dashboard() {
     },
     fetchProjectList,
   ] = useRequest(fetchProjectListCallback);
+
   useEffect(() => {
     if (fetchProjectListError.status === 0 && fetchProjectListResponse) {
       const list = fetchProjectListResponse;
@@ -213,18 +214,22 @@ export default function Dashboard() {
     }
   }, [tableFilter, init, fetchProjectList]);
 
-  const goAdd = cancerId => {
-    return history.push(`/app/project/add/${cancerId}`);
+  const goAdd = () => {
+    return history.push(`/app/project/add`);
   };
+
   const goView = (cancerId, projectId) => {
     return history.push(`/app/project/${cancerId}/${projectId}`);
   };
+
   const goEdit = (cancerId, projectId) => {
     return history.push(`/app/project/update/${cancerId}/${projectId}`);
   };
+
   const del = projectId => {
     console.log(projectId);
   };
+
   const tableColumns = makeTableColumns(goEdit, goView, del);
   return (
     <div className='dashboard-layer'>
