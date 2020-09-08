@@ -29,8 +29,9 @@ export default function ProjectView() {
   const goBack = () => {
     return history.push('/app/project/index');
   };
+
   return (
-    <div className='dashboard-layer'>
+    <div className='project-detail-page'>
       {responseMemo && (
         <div>
           <DetailItem itemWidth label='负责医生'>

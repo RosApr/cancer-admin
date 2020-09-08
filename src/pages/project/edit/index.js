@@ -1,9 +1,18 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Button, Input, Form, Space, Select, Tag } from 'antd';
+import {
+  Button,
+  Input,
+  Form,
+  Space,
+  Select,
+  Tag,
+  message as Message,
+} from 'antd';
 import {
   fetchProjectDetailApi,
   updateProjectCheckApi,
   updateProjectConfigApi,
+  addProjectConfigApi,
 } from '@/api/project';
 import { getDoctorListApi } from '@/api/doctor';
 import { fetchCancersApi } from '@/api/cancer';
@@ -28,6 +37,7 @@ const initialFormData = {
   description: '',
   check_criterion: '',
   person_in_charge: '',
+  category_l1: '',
 };
 
 export default function ProjectForm() {
@@ -80,13 +90,7 @@ export default function ProjectForm() {
   }, [isUpdate, fetchProject, fetchCancer, init]);
 
   useEffect(() => {
-    if (
-      fetchProjectResponse &&
-      fetchProjectError.status === 0 &&
-      fetchDoctorResponse &&
-      fetchDoctorError.status === 0
-    ) {
-      setDoctorList(fetchDoctorResponse);
+    if (fetchProjectResponse && fetchProjectError.status === 0) {
       setFormInitialData({
         ...initialFormData,
         ...fetchProjectResponse,
@@ -97,33 +101,73 @@ export default function ProjectForm() {
         ),
       });
     }
+
+    if (fetchDoctorResponse && fetchDoctorError.status === 0) {
+      setDoctorList(fetchDoctorResponse);
+    }
+    if (
+      fetchCancerResponse &&
+      fetchCancerError.status === 0 &&
+      fetchDoctorResponse &&
+      fetchDoctorError.status === 0
+    ) {
+      setFormInitialData({
+        ...initialFormData,
+        category_l1: fetchCancerResponse[0]['name'],
+        person_in_charge: fetchDoctorResponse[0]['name'],
+      });
+    }
   }, [
     fetchProjectResponse,
     fetchProjectError,
     fetchDoctorResponse,
     fetchDoctorError,
+    fetchCancerResponse,
+    fetchCancerError,
   ]);
 
   const goProjectList = () => history.push('/app/project/index');
 
   // submit form function callback version
-  const submitCb = useCallback((project_id, data) => {
-    const { check_criterion, ...config } = data;
-    const checkData = { check_criterion: JSON.parse(check_criterion) };
-    return Promise.all([
-      updateProjectCheckApi(project_id, checkData),
-      updateProjectConfigApi(project_id, config),
-    ]);
-  }, []);
+  const submitCb = useCallback(
+    (project_id, data) => {
+      const { check_criterion, ...config } = data;
+      // }
+      if (isUpdate) {
+        try {
+          const checkData = { check_criterion: JSON.parse(check_criterion) };
+          return Promise.all([
+            updateProjectCheckApi(project_id, checkData),
+            updateProjectConfigApi(project_id, config),
+          ]);
+        } catch (e) {
+          return { status: 1, message: '123' };
+        }
+      } else {
+        try {
+          const cancerId = fetchCancerResponse.filter(
+            ({ name }) => name === data.category_l1
+          )[0]['id'];
+          return addProjectConfigApi(cancerId, data);
+        } catch (e) {
+          return { status: 1, message: '123' };
+        }
+      }
+    },
+    [isUpdate, fetchCancerResponse]
+  );
 
   const [{ error: submitError }, submit] = useRequest(submitCb);
 
-  useRequestResult({
-    error: submitError,
-    cb: goProjectList,
-    // messageTip: isEdit ? '修改成功！' : '添加成功！',
-    messageTip: '修改成功！',
-  });
+  useEffect(() => {
+    if (submitError.status === 1) {
+      Message.success('操作异常！');
+    } else if (submitError.status === 0) {
+      Message.success(isUpdate ? '修改成功！' : '添加成功！').then(() => {
+        goProjectList();
+      });
+    }
+  }, [submitError, goProjectList, isUpdate]);
 
   const handleSubmit = () => {
     form
@@ -146,6 +190,17 @@ export default function ProjectForm() {
           {...FORM_ITEM_LAYOUT}
           initialValues={formInitialData}
         >
+          {fetchCancerResponse && fetchCancerError.status === 0 && (
+            <Item label='所属癌症' name='category_l1'>
+              <Select>
+                {fetchCancerResponse.map(({ name }) => (
+                  <Option value={name} key={name}>
+                    {name}
+                  </Option>
+                ))}
+              </Select>
+            </Item>
+          )}
           <Item name='person_in_charge' label='负责医生'>
             <Select>
               {doctorList.map(({ name, position, telphone, visit_time }) => (
@@ -178,13 +233,15 @@ export default function ProjectForm() {
           >
             <TextArea autoSize={textareaConfig} />
           </Item>
-          <Item
-            label='配置'
-            name='check_criterion'
-            rules={[{ required: true, message: '请填写配置' }]}
-          >
-            <TextArea autoSize={textareaConfig} />
-          </Item>
+          {isUpdate && (
+            <Item
+              label='配置'
+              name='check_criterion'
+              rules={[{ required: true, message: '请填写配置' }]}
+            >
+              <TextArea autoSize={textareaConfig} />
+            </Item>
+          )}
           <Item wrapperCol={{ span: 24 }} className='center'>
             <Space size='middle'>
               <Button type='primary' onClick={handleSubmit}>

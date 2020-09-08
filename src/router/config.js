@@ -18,18 +18,18 @@ export const routeMap = [
     isInMenu: !!1,
     menuIcon: HomeOutlined,
   },
-  // 更新|新增
+  // 详情
   {
-    path: '/app/project/:operationType/:cancer_id?/:project_id?',
-    main: lazy(() => import('@/pages/project/edit/index')),
+    path: '/app/project/view/:cancer_id/:project_id',
+    main: lazy(() => import('@/pages/project/view/index')),
     role: [ROLE_USER],
     state: { meta: '项目' },
     isInMenu: !1,
   },
-  // 详情
+  // 更新|新增
   {
-    path: '/app/project/:cancer_id/:project_id',
-    main: lazy(() => import('@/pages/project/view/index')),
+    path: '/app/project/form/:operationType/:cancer_id?/:project_id?',
+    main: lazy(() => import('@/pages/project/edit/index')),
     role: [ROLE_USER],
     state: { meta: '项目' },
     isInMenu: !1,

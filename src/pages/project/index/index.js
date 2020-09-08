@@ -215,15 +215,15 @@ export default function Dashboard() {
   }, [tableFilter, init, fetchProjectList]);
 
   const goAdd = () => {
-    return history.push(`/app/project/add`);
+    return history.push(`/app/project/form/add`);
   };
 
   const goView = (cancerId, projectId) => {
-    return history.push(`/app/project/${cancerId}/${projectId}`);
+    return history.push(`/app/project/view/${cancerId}/${projectId}`);
   };
 
   const goEdit = (cancerId, projectId) => {
-    return history.push(`/app/project/update/${cancerId}/${projectId}`);
+    return history.push(`/app/project/form/update/${cancerId}/${projectId}`);
   };
 
   const del = projectId => {

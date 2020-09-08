@@ -30,3 +30,11 @@ export function updateProjectConfigApi(project_id, data = {}) {
     data,
   });
 }
+
+export function addProjectConfigApi(cancer_id, data) {
+  return request({
+    url: `${process.env.REACT_APP_REQUEST_BASE_URL}/cancer/${cancer_id}/project`,
+    method: 'post',
+    data,
+  });
+}
