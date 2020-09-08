@@ -3,11 +3,12 @@ import { Button, Table, Space, Popconfirm } from 'antd';
 import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
 import { fetchCancersApi } from '@/api/cancer';
-import { fetchProjectListApi } from '@/api/project';
+import { fetchProjectListApi, delProjectApi } from '@/api/project';
 import {
   useNavigate,
   useFetchDataOnMount,
   useRequest,
+  useRequestResult,
 } from '@/utils/requestHook';
 import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
 import './index.scss';
@@ -226,8 +227,54 @@ export default function Dashboard() {
     return history.push(`/app/project/form/update/${cancerId}/${projectId}`);
   };
 
+  const delProjectCallback = useCallback(projectId => {
+    return delProjectApi(projectId);
+  }, []);
+
+  const [
+    {
+      error: delProjectError,
+      response: delProjectResponse,
+      requestData: delProjectRequestData,
+    },
+    delProject,
+  ] = useRequest(delProjectCallback);
+
+  useEffect(() => {
+    if (delProjectError.status === 0 && delProjectResponse) {
+      const _projectList = [...projectList.list];
+      _projectList.splice(
+        _projectList.findIndex(({ id }) => id === delProjectRequestData),
+        1
+      );
+      setProjectList({
+        list: _projectList,
+        total: _projectList.length || 0,
+      });
+      delProjectError.status = 2;
+    }
+  }, [delProjectError, projectList, delProjectResponse, delProjectRequestData]);
+
+  useRequestResult({
+    response: delProjectResponse,
+    requestData: delProjectRequestData,
+    error: delProjectError,
+    cb: requestData => {
+      const _projectList = [...projectList.list];
+      _projectList.splice(
+        _projectList.findIndex(({ id }) => id === requestData),
+        1
+      );
+      setProjectList({
+        list: _projectList,
+        total: _projectList.length || 0,
+      });
+      delProjectError.status = 2;
+    },
+  });
+
   const del = projectId => {
-    console.log(projectId);
+    delProject(projectId);
   };
 
   const tableColumns = makeTableColumns(goEdit, goView, del);

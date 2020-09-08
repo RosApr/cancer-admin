@@ -38,3 +38,10 @@ export function addProjectConfigApi(cancer_id, data) {
     data,
   });
 }
+
+export function delProjectApi(project_id) {
+  return request({
+    url: `${process.env.REACT_APP_REQUEST_BASE_URL}/project/${project_id}`,
+    method: 'delete',
+  });
+}

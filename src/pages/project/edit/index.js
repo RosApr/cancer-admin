@@ -20,7 +20,6 @@ import {
   useNavigate,
   useFetchDataOnMount,
   useRequest,
-  useRequestResult,
 } from '@/utils/requestHook';
 import { FORM_ITEM_LAYOUT } from '@/utils/consts';
 import { useReturnCurrentFormStatus } from '@/utils/requestHook';
@@ -126,7 +125,9 @@ export default function ProjectForm() {
     fetchCancerError,
   ]);
 
-  const goProjectList = () => history.push('/app/project/index');
+  const goProjectList = useCallback(() => history.push('/app/project/index'), [
+    history,
+  ]);
 
   // submit form function callback version
   const submitCb = useCallback(
@@ -190,6 +191,11 @@ export default function ProjectForm() {
           {...FORM_ITEM_LAYOUT}
           initialValues={formInitialData}
         >
+          {isUpdate && fetchProjectResponse && (
+            <Item label='配置检查'>
+              {fetchProjectResponse.is_check_criterion_empty ? '空' : '非空'}
+            </Item>
+          )}
           {fetchCancerResponse && fetchCancerError.status === 0 && (
             <Item label='所属癌症' name='category_l1'>
               <Select>
@@ -201,6 +207,7 @@ export default function ProjectForm() {
               </Select>
             </Item>
           )}
+
           <Item name='person_in_charge' label='负责医生'>
             <Select>
               {doctorList.map(({ name, position, telphone, visit_time }) => (
