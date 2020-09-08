@@ -1,177 +1,302 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
+import { Button, Table, Space, Popconfirm } from 'antd';
+import TableFilterContainer from '@/components/tableBar';
+import ListFilterForm from '@/components/listFilterForm';
+// import { fetchCancersApi } from '@/api/cancer';
+import { fetchDoctorListApi } from '@/api/doctor';
 import {
-  Button,
-  Table,
-  Row,
-  Col,
-  Avatar,
-  Popconfirm,
-  message,
-  Space,
-} from 'antd';
-import { createSelector } from 'reselect';
-import { useDispatch } from 'react-redux';
-import { sync, useNavigate } from '@/utils/requestHook';
-import { fetchDoctorList } from '@/redux/actions/doctor';
-import { DEL_DOCTOR } from '@/redux/actionTypes/doctor';
-import { useShallowEqualSelector } from '@/utils/common';
-import { syncDoctor, deleteDoctor } from '@/api/doctor';
+  useNavigate,
+  useFetchDataOnMount,
+  useRequest,
+  useRequestResult,
+} from '@/utils/requestHook';
+import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
 import './index.scss';
 
-const doctorListSelector = createSelector(
-  state => state.doctor.list,
-  state => state.doctor.isFetching,
-  state => state.doctor.isFetchError,
-  (list, isFetching, isFetchError) => ({
-    list,
-    isFetching,
-    isFetchError,
-  }),
-);
-
-const makeTableColumns = ({ handleEditBtnClick, popConfirmConfig }) => [
+const makeTableColumns = (
+  goView = () => {},
+  goEdit = () => {},
+  del = () => {}
+) => [
   {
-    title: '姓名',
-    dataIndex: 'name',
-    width: '8%',
+    title: 'id',
+    dataIndex: 'id',
     align: 'center',
+    width: 50,
   },
   {
-    title: '照片',
-    dataIndex: 'avatar',
-    render: (avatar, record) => {
-      const avatarProps = {
-        ...(avatar
-          ? { src: avatar, size: 160 }
-          : { icon: record.name.slice(0, 1), size: 80 }),
-      };
-      return <Avatar {...avatarProps} />;
-    },
-    align: 'center',
+    title: '项目描述',
+    dataIndex: 'description',
+    align: 'left',
+    render: input => input || '等待回填',
   },
   {
-    title: '职称',
-    dataIndex: 'title',
-    width: '8%',
+    title: '负责医生',
+    dataIndex: 'person_in_charge',
     align: 'center',
+    width: 120,
+    render: input => input || '等待回填',
   },
   {
-    title: '所属诊所',
-    dataIndex: 'office',
-    render: ({ name }) => name,
-    width: '12%',
+    title: '提交人数',
+    dataIndex: 'submit_patients_num',
     align: 'center',
+    width: 120,
+    render: input => input || 0,
   },
   {
-    title: '所属科室',
-    dataIndex: 'departmentName',
-    width: '10%',
+    title: '入组人数',
+    dataIndex: 'accept_patients_num',
     align: 'center',
+    width: 120,
+    render: input => input || 0,
   },
   {
-    title: '擅长方向',
-    dataIndex: 'expertIn',
+    title: '创建日期',
+    dataIndex: 'create_time',
     align: 'center',
-    render: expertIn => <span className='export-in'>{expertIn}</span>,
+    width: 150,
+    render: input => input || '等待回填',
   },
   {
-    title: '支持私人医生',
-    dataIndex: 'privateSupport',
-    render: privateSupport => (privateSupport ? '是' : '否'),
-    width: '10%',
+    title: '更新日期',
+    dataIndex: 'update_time',
     align: 'center',
+    width: 150,
+    render: input => input || '等待回填',
   },
   {
     title: '操作',
-    dataIndex: 'manual',
-    render: (_, record) => (
-      <Space size='middle'>
-        <Button type='' onClick={() => handleEditBtnClick(record.id)}>
-          编辑
-        </Button>
-        <Popconfirm {...popConfirmConfig(record)}>
-          <Button danger>删除</Button>
-        </Popconfirm>
-      </Space>
-    ),
+    dataIndex: 'id',
+    width: 280,
+    render: (id, { cancer: { id: cancerId } }) => {
+      return (
+        <Space size='middle'>
+          <Button onClick={() => goView(cancerId, id)}>查看</Button>
+          {/* <Button type='primary' onClick={() => goEdit(cancerId, id)}>
+            编辑
+          </Button>
+          <Popconfirm
+            onConfirm={() => del(id)}
+            placement='bottomRight'
+            cancelText='取消'
+            okText='确认'
+            title={`确认要删除${id}号项目吗？`}
+          >
+            <Button type='danger'>删除</Button>
+          </Popconfirm> */}
+        </Space>
+      );
+    },
   },
 ];
-export default function DoctorIndex() {
-  const dispatch = useDispatch();
-  const { list, isFetching, isFetchError } = useShallowEqualSelector(
-    doctorListSelector,
-  );
 
-  useEffect(() => {
-    dispatch(fetchDoctorList());
-  }, [dispatch]);
+const filterFormConfig = [
+  {
+    key: 'name',
+    defaultValue: '',
+    placeholder: '请输入医生名称',
+    isFullMatch: false,
+    value: '',
+  },
+];
 
+const doctorListConfig = {
+  list: [],
+  total: 0,
+};
+
+export default function Dashboard() {
   const { history } = useNavigate();
 
-  const popConfirmConfig = ({ id, name }) => {
-    return {
-      onConfirm: async () => {
-        try {
-          await deleteDoctor(id);
-          dispatch({
-            type: DEL_DOCTOR,
-            payload: {
-              id,
-            },
-          });
-        } catch (e) {
-          message.error({
-            content: e.message,
-          });
-        }
-      },
-      placement: 'bottomRight',
-      cancelText: '取消',
-      okText: '确认',
-      title: `确认删除${name}医生吗`,
-    };
-  };
+  const [doctorList, setDoctorList] = useState(() => doctorListConfig);
+  const [current, setCurrent] = useState(1);
+  const [init, setInit] = useState(false);
 
-  const handleEditBtnClick = id => {
-    history.push(`/app/doctor/basic/${id}`);
-  };
-
-  const tableColumn = makeTableColumns({
-    popConfirmConfig,
-    handleEditBtnClick,
+  // const fetchCancerListCallback = useCallback(() => {
+  //   return fetchCancersApi();
+  // }, []);
+  // const {
+  //   response: fetchCancerListResponse,
+  //   error: fetchCancerListError,
+  // } = useFetchDataOnMount(fetchCancerListCallback);
+  // init table filter campaign select list
+  const [tableFilter, setTableFilter] = useState(() => {
+    return initTableFilterConfig(filterFormConfig);
   });
+
+  // useEffect(() => {
+  //   if (fetchCancerListError.status === 0 && fetchCancerListResponse) {
+  //     const cancerSelect = filterFormConfig.filter(
+  //       item => item.key === 'cancer_id'
+  //     )[0];
+  //     cancerSelect['list'] = [
+  //       { id: 0, name: '全部' },
+  //       ...fetchCancerListResponse,
+  //     ];
+  //     setTableFilter(initTableFilterConfig(filterFormConfig));
+  //   }
+  // }, [fetchCancerListResponse, fetchCancerListError]);
+
+  // fire table filter condition change
+  const handleFilterChange = useCallback(
+    currentFilters => {
+      setTableFilter(prev => {
+        const formatFilters = prev.map(item => {
+          return {
+            ...item,
+            value: currentFilters[item['key']],
+          };
+        });
+        return formatFilters;
+      });
+      setInit(false);
+      setCurrent(1);
+      setDoctorList(doctorListConfig);
+    },
+    [setTableFilter]
+  );
+
+  const fetchDoctorListCallback = useCallback(() => {
+    const fetchParams = {
+      ...makeTableFilterParams(tableFilter),
+    };
+    return fetchDoctorListApi(fetchParams);
+  }, [tableFilter]);
+
+  const [
+    {
+      error: fetchDoctorListError,
+      response: fetchDoctorListResponse,
+      isLoading: fetchDoctorListLoading,
+    },
+    fetchDoctorList,
+  ] = useRequest(fetchDoctorListCallback);
+
+  useEffect(() => {
+    if (fetchDoctorListError.status === 0 && fetchDoctorListResponse) {
+      const list = fetchDoctorListResponse;
+      setDoctorList({
+        list: list,
+        total: list.length || 0,
+      });
+    }
+  }, [fetchDoctorListError, fetchDoctorListResponse]);
+
+  const handlePageChange = e => {
+    setCurrent(e);
+  };
+
+  useEffect(() => {
+    console.log(tableFilter);
+    console.log(init);
+    if (tableFilter && !init) {
+      fetchDoctorList();
+      setInit(true);
+    }
+  }, [tableFilter, init, fetchDoctorList]);
+
+  const goAdd = () => {
+    return history.push(`/app/doctor/form/add`);
+  };
+
+  const goView = (cancerId, doctorId) => {
+    return history.push(`/app/doctor/view/${cancerId}/${doctorId}`);
+  };
+
+  // const goEdit = (cancerId, doctorId) => {
+  //   return history.push(`/app/doctor/form/update/${cancerId}/${doctorId}`);
+  // };
+
+  // const delDoctorCallback = useCallback(doctorId => {
+  //   return delDoctorApi(doctorId);
+  // }, []);
+
+  // const [
+  //   {
+  //     error: delDoctorError,
+  //     response: delDoctorResponse,
+  //     requestData: delDoctorRequestData,
+  //   },
+  //   delDoctor,
+  // ] = useRequest(delDoctorCallback);
+
+  // useEffect(() => {
+  //   if (delDoctorError.status === 0 && delDoctorResponse) {
+  //     const _doctorList = [...doctorList.list];
+  //     _doctorList.splice(
+  //       _doctorList.findIndex(({ id }) => id === delDoctorRequestData),
+  //       1
+  //     );
+  //     setDoctorList({
+  //       list: _doctorList,
+  //       total: _doctorList.length || 0,
+  //     });
+  //     delDoctorError.status = 2;
+  //   }
+  // }, [delDoctorError, doctorList, delDoctorResponse, delDoctorRequestData]);
+
+  // useRequestResult({
+  //   response: delDoctorResponse,
+  //   requestData: delDoctorRequestData,
+  //   error: delDoctorError,
+  //   cb: requestData => {
+  //     const _doctorList = [...doctorList.list];
+  //     _doctorList.splice(
+  //       _doctorList.findIndex(({ id }) => id === requestData),
+  //       1
+  //     );
+  //     setDoctorList({
+  //       list: _doctorList,
+  //       total: _doctorList.length || 0,
+  //     });
+  //     delDoctorError.status = 2;
+  //   },
+  // });
+
+  // const del = doctorId => {
+  //   delDoctor(doctorId);
+  // };
+
+  // const tableColumns = makeTableColumns(goEdit, goView, del);
+  const tableColumns = makeTableColumns(goView);
   return (
-    <div className='doctor-index-layer'>
-      <Row align='middle' justify='end' gutter={24}>
-        <Col flex='0 0 auto'>
-          <h3>同步更新医生列表:</h3>
-        </Col>
-        <Col flex='0 0 auto'>
-          <Space size='middle'>
-            <Button type='primary' onClick={() => sync(syncDoctor)}>
-              同步更新
-            </Button>
-            {/* <Button
-              type='primary'
-              onClick={() => history.push('/app/doctor/basic')}
-            >
-              新增
-            </Button> */}
-          </Space>
-        </Col>
-      </Row>
+    <div className='dashboard-layer'>
+      {tableFilter && (
+        <TableFilterContainer
+          left={() => {
+            return (
+              <ListFilterForm
+                config={filterFormConfig}
+                onSearch={handleFilterChange}
+              />
+            );
+          }}
+          right={() => {
+            return (
+              <Button type='primary' onClick={goAdd}>
+                添加医生
+              </Button>
+            );
+          }}
+        />
+      )}
       <Table
-        loading={{
-          delay: 500,
-          spinning: isFetching,
-        }}
-        className='list-table'
-        dataSource={list}
+        loading={fetchDoctorListLoading}
         rowKey='id'
         bordered
-        pagination={false}
-        columns={tableColumn}
-      />
+        columns={tableColumns}
+        dataSource={doctorList.list}
+        className='table'
+        pagination={{
+          current: current,
+          pageSize: 10,
+          total: doctorList.total,
+          showSizeChanger: false,
+          hideOnSinglePage: true,
+          onChange: handlePageChange,
+        }}
+      ></Table>
     </div>
   );
 }

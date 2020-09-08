@@ -48,6 +48,10 @@ service.interceptors.response.use(
     const {
       response: { status, data },
     } = error;
+    if (status === 401) {
+      // no permession to access -> navigate to login page
+      window.location.href = '/login';
+    }
     // need optimize
     if (status === 403) {
       // todo

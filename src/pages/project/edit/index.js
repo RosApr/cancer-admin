@@ -14,7 +14,7 @@ import {
   updateProjectConfigApi,
   addProjectConfigApi,
 } from '@/api/project';
-import { getDoctorListApi } from '@/api/doctor';
+import { fetchDoctorListApi } from '@/api/doctor';
 import { fetchCancersApi } from '@/api/cancer';
 import {
   useNavigate,
@@ -50,7 +50,7 @@ export default function ProjectForm() {
   const [doctorList, setDoctorList] = useState([]);
 
   const fetchDoctorCallback = useCallback(() => {
-    return getDoctorListApi();
+    return fetchDoctorListApi();
   }, []);
 
   const {

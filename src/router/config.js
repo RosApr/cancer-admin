@@ -34,6 +34,23 @@ export const routeMap = [
     state: { meta: '项目' },
     isInMenu: !1,
   },
+  // 列表
+  {
+    path: '/app/doctor/index',
+    main: lazy(() => import('@/pages/doctor/index/index')),
+    role: [ROLE_USER],
+    state: { meta: '医生管理' },
+    isInMenu: !!1,
+    menuIcon: HomeOutlined,
+  },
+  // 详情
+  {
+    path: '/app/doctor/view/:doctor_id',
+    main: lazy(() => import('@/pages/doctor/view/index')),
+    role: [ROLE_USER],
+    state: { meta: '医生' },
+    isInMenu: !1,
+  },
   // 登录
   {
     path: '/login',

@@ -88,7 +88,6 @@ const makeTableColumns = (
         </Space>
       );
     },
-    fixed: 'right',
   },
 ];
 
@@ -293,7 +292,7 @@ export default function Dashboard() {
           right={() => {
             return (
               <Button type='primary' onClick={goAdd}>
-                添加策略
+                添加项目
               </Button>
             );
           }}
