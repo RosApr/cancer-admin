@@ -65,7 +65,7 @@ export default function ProjectView() {
               </Tag>
             ) : (
               <Tag icon={<MinusCircleOutlined />} color='cyan'>
-                已归档
+                已结束
               </Tag>
             )}
           </DetailItem>

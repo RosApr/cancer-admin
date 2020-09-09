@@ -16,3 +16,14 @@ export const FORM_STATUS = {
   add: false,
   update: true,
 };
+
+export const PROCESS_CONFIG = [
+  {
+    key: '正在进行',
+    value: 0,
+  },
+  {
+    key: '已结束',
+    value: 1,
+  },
+];

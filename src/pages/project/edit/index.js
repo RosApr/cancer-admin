@@ -6,6 +6,7 @@ import {
   Space,
   Select,
   Tag,
+  Switch,
   message as Message,
 } from 'antd';
 import {
@@ -37,6 +38,7 @@ const initialFormData = {
   check_criterion: '',
   person_in_charge: '',
   category_l1: '',
+  progress: !!0,
 };
 
 export default function ProjectForm() {
@@ -89,6 +91,7 @@ export default function ProjectForm() {
   }, [isUpdate, fetchProject, fetchCancer, init]);
 
   useEffect(() => {
+    // 编辑
     if (fetchProjectResponse && fetchProjectError.status === 0) {
       setFormInitialData({
         ...initialFormData,
@@ -98,12 +101,14 @@ export default function ProjectForm() {
           null,
           2
         ),
+        progress: !fetchProjectResponse.progress,
       });
     }
 
     if (fetchDoctorResponse && fetchDoctorError.status === 0) {
       setDoctorList(fetchDoctorResponse);
     }
+    // 新增
     if (
       fetchCancerResponse &&
       fetchCancerError.status === 0 &&
@@ -139,7 +144,10 @@ export default function ProjectForm() {
           const checkData = { check_criterion: JSON.parse(check_criterion) };
           return Promise.all([
             updateProjectCheckApi(project_id, checkData),
-            updateProjectConfigApi(project_id, config),
+            updateProjectConfigApi(project_id, {
+              ...config,
+              progress: +!config.progress,
+            }),
           ]);
         } catch (e) {
           return { status: 1, message: '123' };
@@ -180,7 +188,7 @@ export default function ProjectForm() {
       })
       .catch(error => {});
   };
-
+  console.log(formInitialData);
   return (
     <div className='dashboard-layer'>
       {formInitialData && doctorList.length > 0 && (
@@ -219,6 +227,11 @@ export default function ProjectForm() {
               ))}
             </Select>
           </Item>
+          {isUpdate && (
+            <Item name='progress' label='项目进度' valuePropName='checked'>
+              <Switch checkedChildren='正在进行' unCheckedChildren='已结束' />
+            </Item>
+          )}
           <Item
             label='入组标准'
             name='acceptance'
