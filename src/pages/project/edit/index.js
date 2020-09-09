@@ -188,7 +188,7 @@ export default function ProjectForm() {
       })
       .catch(error => {});
   };
-  console.log(formInitialData);
+
   return (
     <div className='dashboard-layer'>
       {formInitialData && doctorList.length > 0 && (

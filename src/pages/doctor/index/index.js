@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Button, Table, Space, Popconfirm } from 'antd';
+import { Button, Table, Space, Popconfirm, Tag } from 'antd';
 import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
 // import { fetchCancersApi } from '@/api/cancer';
@@ -25,54 +25,46 @@ const makeTableColumns = (
     width: 50,
   },
   {
-    title: '项目描述',
-    dataIndex: 'description',
-    align: 'left',
-    render: input => input || '等待回填',
-  },
-  {
-    title: '负责医生',
-    dataIndex: 'person_in_charge',
+    title: '医生姓名',
+    dataIndex: 'name',
     align: 'center',
-    width: 120,
-    render: input => input || '等待回填',
   },
   {
-    title: '提交人数',
-    dataIndex: 'submit_patients_num',
+    title: '职称',
+    dataIndex: 'position',
     align: 'center',
-    width: 120,
-    render: input => input || 0,
   },
   {
-    title: '入组人数',
-    dataIndex: 'accept_patients_num',
+    title: '联系电话',
+    dataIndex: 'telphone',
     align: 'center',
-    width: 120,
-    render: input => input || 0,
   },
   {
-    title: '创建日期',
-    dataIndex: 'create_time',
+    title: '门诊时间',
+    dataIndex: 'visit_time',
+    align: 'center',
+  },
+  {
+    title: '微信绑定',
+    dataIndex: 'isRegister',
     align: 'center',
     width: 150,
-    render: input => input || '等待回填',
+    render: input =>
+      input ? (
+        <Tag color='success'>已绑定</Tag>
+      ) : (
+        <Tag color='warning'>未绑定</Tag>
+      ),
   },
-  {
-    title: '更新日期',
-    dataIndex: 'update_time',
-    align: 'center',
-    width: 150,
-    render: input => input || '等待回填',
-  },
+
   {
     title: '操作',
     dataIndex: 'id',
     width: 280,
-    render: (id, { cancer: { id: cancerId } }) => {
+    render: input => {
       return (
         <Space size='middle'>
-          <Button onClick={() => goView(cancerId, id)}>查看</Button>
+          <Button onClick={() => goView(input)}>查看</Button>
           {/* <Button type='primary' onClick={() => goEdit(cancerId, id)}>
             编辑
           </Button>
@@ -188,8 +180,6 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    console.log(tableFilter);
-    console.log(init);
     if (tableFilter && !init) {
       fetchDoctorList();
       setInit(true);
@@ -200,8 +190,8 @@ export default function Dashboard() {
     return history.push(`/app/doctor/form/add`);
   };
 
-  const goView = (cancerId, doctorId) => {
-    return history.push(`/app/doctor/view/${cancerId}/${doctorId}`);
+  const goView = doctorId => {
+    return history.push(`/app/doctor/view/${doctorId}`);
   };
 
   // const goEdit = (cancerId, doctorId) => {

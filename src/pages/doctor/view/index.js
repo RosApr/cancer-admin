@@ -1,81 +1,118 @@
-import React, { useCallback, useMemo } from 'react';
-import { Tag, Button, Input } from 'antd';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Tag, Button, Table } from 'antd';
 import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
-import { fetchProjectDetailApi } from '@/api/project';
+import { fetchDoctorDetailApi } from '@/api/doctor';
 import { useFetchDataOnMount, useNavigate } from '@/utils/requestHook';
 import DetailItem from '@/components/detailItem';
 import './index.scss';
 
-const { TextArea } = Input;
-const textareaConfig = { minRows: 4 };
+const tableColumns = [
+  {
+    title: 'id',
+    dataIndex: 'id',
+    align: 'center',
+    width: 50,
+  },
+  {
+    title: '项目描述',
+    dataIndex: 'description',
+    align: 'center',
+    width: 120,
+    render: input => input || 0,
+  },
+  {
+    title: '提交人数',
+    dataIndex: 'submit_patients_num',
+    align: 'center',
+    width: 120,
+    render: input => input || 0,
+  },
+  {
+    title: '入组人数',
+    dataIndex: 'accept_patients_num',
+    align: 'center',
+    width: 120,
+    render: input => input || 0,
+  },
+  {
+    title: '项目状态',
+    dataIndex: 'progress',
+    align: 'center',
+    width: 120,
+    render: input =>
+      input === 0 ? (
+        <Tag icon={<SyncOutlined spin />} color='processing'>
+          正在进行
+        </Tag>
+      ) : (
+        <Tag icon={<MinusCircleOutlined />} color='cyan'>
+          已结束
+        </Tag>
+      ),
+  },
+];
 
-export default function ProjectView() {
+export default function DoctorView() {
   const { params, history } = useNavigate();
-  const fetchProjectCallback = useCallback(() => {
-    return fetchProjectDetailApi(params);
+
+  const fetchDoctorCallback = useCallback(() => {
+    return fetchDoctorDetailApi(params.doctor_id);
   }, [params]);
   const {
-    response: fetchProjectResponse,
-    error: fetchProjectError,
-  } = useFetchDataOnMount(fetchProjectCallback);
+    response: fetchDoctorResponse,
+    error: fetchDoctorError,
+  } = useFetchDataOnMount(fetchDoctorCallback);
 
   const responseMemo = useMemo(() => {
-    if (fetchProjectError.status === 0 && fetchProjectResponse) {
-      return fetchProjectResponse;
+    if (fetchDoctorError.status === 0 && fetchDoctorResponse) {
+      return fetchDoctorResponse;
     }
     return null;
-  }, [fetchProjectError, fetchProjectResponse]);
+  }, [fetchDoctorError, fetchDoctorResponse]);
 
   const goBack = () => {
-    return history.push('/app/project/index');
+    return history.push('/app/doctor/index');
   };
-
+  const [current, setCurrent] = useState(1);
+  const handlePageChange = e => {
+    setCurrent(e);
+  };
   return (
-    <div className='project-detail-page'>
+    <div className='doctor-detail-page'>
       {responseMemo && (
         <div>
-          <DetailItem itemWidth label='负责医生'>
-            {responseMemo.person_in_charge}
-            <Tag color='blue'>{responseMemo.doctor_position}</Tag>
-            {responseMemo.doctor_telphone
-              ? ` | ${responseMemo.doctor_telphone}`
-              : ''}
-            {responseMemo.doctor_visit_time &&
-              ` |  门诊时间：${responseMemo.doctor_visit_time}`}
+          <DetailItem itemWidth label='id'>
+            {responseMemo.id}
           </DetailItem>
-          <DetailItem label='入组标准'>
-            <div
-              dangerouslySetInnerHTML={{ __html: responseMemo.acceptance }}
-            />
+          <DetailItem itemWidth label='医生姓名'>
+            {responseMemo.name}
           </DetailItem>
-          <DetailItem label='项目描述'>{responseMemo.description}</DetailItem>
-          <DetailItem label='排除标准'>
-            <div dangerouslySetInnerHTML={{ __html: responseMemo.exclusion }} />
-          </DetailItem>
-          <DetailItem label='入组人数'>
-            {responseMemo.accept_patients_num}人
-          </DetailItem>
-          <DetailItem label='申请人数'>
-            {responseMemo.submit_patients_num}人
-          </DetailItem>
-          <DetailItem label='项目进度'>
-            {responseMemo.progress === 0 ? (
-              <Tag icon={<SyncOutlined spin />} color='processing'>
-                正在进行
-              </Tag>
+          <DetailItem label='职称'>{responseMemo.position}</DetailItem>
+          <DetailItem label='联系电话'>{responseMemo.telphone}</DetailItem>
+          <DetailItem label='门诊时间'>{responseMemo.visit_time}</DetailItem>
+          <DetailItem label='微信绑定'>
+            {responseMemo.isRegister ? (
+              <Tag color='success'>已绑定</Tag>
             ) : (
-              <Tag icon={<MinusCircleOutlined />} color='cyan'>
-                已结束
-              </Tag>
+              <Tag color='warning'>未绑定</Tag>
             )}
           </DetailItem>
-          <DetailItem label='配置'>
-            <TextArea
-              disabled
-              autoSize={textareaConfig}
+          <DetailItem label='负责项目'>
+            <Table
+              rowKey='id'
               bordered
-              value={JSON.stringify(responseMemo.check_criterion, null, 2)}
-            />
+              columns={tableColumns}
+              dataSource={responseMemo.projects || []}
+              className='table'
+              pagination={{
+                current: current,
+                pageSize: 10,
+                total: responseMemo.projects.total || 0,
+                showSizeChanger: false,
+                hideOnSinglePage: true,
+                onChange: handlePageChange,
+              }}
+            ></Table>
           </DetailItem>
           <DetailItem>
             <Button type='primary' onClick={goBack}>
