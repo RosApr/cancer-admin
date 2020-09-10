@@ -150,7 +150,7 @@ export default function ProjectForm() {
             }),
           ]);
         } catch (e) {
-          return { status: 1, message: '123' };
+          return { status: 1, message: '请求异常!' };
         }
       } else {
         try {
@@ -159,7 +159,7 @@ export default function ProjectForm() {
           )[0]['id'];
           return addProjectConfigApi(cancerId, data);
         } catch (e) {
-          return { status: 1, message: '123' };
+          return { status: 1, message: '请求异常!' };
         }
       }
     },

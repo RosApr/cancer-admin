@@ -239,20 +239,20 @@ export default function Dashboard() {
     delProject,
   ] = useRequest(delProjectCallback);
 
-  useEffect(() => {
-    if (delProjectError.status === 0 && delProjectResponse) {
-      const _projectList = [...projectList.list];
-      _projectList.splice(
-        _projectList.findIndex(({ id }) => id === delProjectRequestData),
-        1
-      );
-      setProjectList({
-        list: _projectList,
-        total: _projectList.length || 0,
-      });
-      delProjectError.status = 2;
-    }
-  }, [delProjectError, projectList, delProjectResponse, delProjectRequestData]);
+  // useEffect(() => {
+  //   if (delProjectError.status === 0 && delProjectResponse) {
+  //     const _projectList = [...projectList.list];
+  //     _projectList.splice(
+  //       _projectList.findIndex(({ id }) => id === delProjectRequestData),
+  //       1
+  //     );
+  //     setProjectList({
+  //       list: _projectList,
+  //       total: _projectList.length || 0,
+  //     });
+  //     delProjectError.status = 2;
+  //   }
+  // }, [delProjectError, projectList, delProjectResponse, delProjectRequestData]);
 
   useRequestResult({
     response: delProjectResponse,

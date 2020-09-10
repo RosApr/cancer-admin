@@ -3,7 +3,7 @@ import { Button, Table, Space, Popconfirm, Tag } from 'antd';
 import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
 // import { fetchCancersApi } from '@/api/cancer';
-import { fetchDoctorListApi } from '@/api/doctor';
+import { fetchDoctorListApi, delDoctorApi } from '@/api/doctor';
 import {
   useNavigate,
   useFetchDataOnMount,
@@ -61,22 +61,22 @@ const makeTableColumns = (
     title: '操作',
     dataIndex: 'id',
     width: 280,
-    render: input => {
+    render: (input, { name }) => {
       return (
         <Space size='middle'>
           <Button onClick={() => goView(input)}>查看</Button>
-          {/* <Button type='primary' onClick={() => goEdit(cancerId, id)}>
+          <Button type='primary' onClick={() => goEdit(input)}>
             编辑
           </Button>
           <Popconfirm
-            onConfirm={() => del(id)}
+            onConfirm={() => del(input)}
             placement='bottomRight'
             cancelText='取消'
             okText='确认'
-            title={`确认要删除${id}号项目吗？`}
+            title={`确认要删除${name}医生吗？`}
           >
             <Button type='danger'>删除</Button>
-          </Popconfirm> */}
+          </Popconfirm>
         </Space>
       );
     },
@@ -190,26 +190,26 @@ export default function Dashboard() {
     return history.push(`/app/doctor/form/add`);
   };
 
+  const goEdit = doctorId => {
+    return history.push(`/app/doctor/form/update/${doctorId}`);
+  };
+
   const goView = doctorId => {
     return history.push(`/app/doctor/view/${doctorId}`);
   };
 
-  // const goEdit = (cancerId, doctorId) => {
-  //   return history.push(`/app/doctor/form/update/${cancerId}/${doctorId}`);
-  // };
+  const delDoctorCallback = useCallback(doctorId => {
+    return delDoctorApi(doctorId);
+  }, []);
 
-  // const delDoctorCallback = useCallback(doctorId => {
-  //   return delDoctorApi(doctorId);
-  // }, []);
-
-  // const [
-  //   {
-  //     error: delDoctorError,
-  //     response: delDoctorResponse,
-  //     requestData: delDoctorRequestData,
-  //   },
-  //   delDoctor,
-  // ] = useRequest(delDoctorCallback);
+  const [
+    {
+      error: delDoctorError,
+      response: delDoctorResponse,
+      requestData: delDoctorRequestData,
+    },
+    delDoctor,
+  ] = useRequest(delDoctorCallback);
 
   // useEffect(() => {
   //   if (delDoctorError.status === 0 && delDoctorResponse) {
@@ -226,30 +226,30 @@ export default function Dashboard() {
   //   }
   // }, [delDoctorError, doctorList, delDoctorResponse, delDoctorRequestData]);
 
-  // useRequestResult({
-  //   response: delDoctorResponse,
-  //   requestData: delDoctorRequestData,
-  //   error: delDoctorError,
-  //   cb: requestData => {
-  //     const _doctorList = [...doctorList.list];
-  //     _doctorList.splice(
-  //       _doctorList.findIndex(({ id }) => id === requestData),
-  //       1
-  //     );
-  //     setDoctorList({
-  //       list: _doctorList,
-  //       total: _doctorList.length || 0,
-  //     });
-  //     delDoctorError.status = 2;
-  //   },
-  // });
+  useRequestResult({
+    response: delDoctorResponse,
+    requestData: delDoctorRequestData,
+    error: delDoctorError,
+    cb: requestData => {
+      const _doctorList = [...doctorList.list];
+      _doctorList.splice(
+        _doctorList.findIndex(({ id }) => id === requestData),
+        1
+      );
+      setDoctorList({
+        list: _doctorList,
+        total: _doctorList.length || 0,
+      });
+      delDoctorError.status = 2;
+    },
+  });
 
-  // const del = doctorId => {
-  //   delDoctor(doctorId);
-  // };
+  const del = doctorId => {
+    delDoctor(doctorId);
+  };
 
   // const tableColumns = makeTableColumns(goEdit, goView, del);
-  const tableColumns = makeTableColumns(goView);
+  const tableColumns = makeTableColumns(goView, goEdit, del);
   return (
     <div className='dashboard-layer'>
       {tableFilter && (
