@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
+import Clipboard from 'react-clipboard.js';
 import {
   Button,
   Input,
@@ -7,6 +8,8 @@ import {
   // Select,
   Switch,
   message as Message,
+  Modal,
+  Tag,
 } from 'antd';
 
 import {
@@ -86,17 +89,27 @@ export default function ProjectForm() {
     [isUpdate]
   );
 
-  const [{ error: submitError }, submit] = useRequest(submitCb);
+  const [
+    { error: submitError, response: updateDoctorResponse },
+    submit,
+  ] = useRequest(submitCb);
+
+  const copySuccess = () => Message.success('复制成功');
+  const [showPwdModal, setShowPwdModal] = useState(false);
+  const handleModalClose = () => {
+    setShowPwdModal(false);
+    goDoctorList();
+  };
 
   useEffect(() => {
     if (submitError.status === 1) {
       Message.success('操作异常！');
     } else if (submitError.status === 0) {
       Message.success(isUpdate ? '修改成功！' : '添加成功！').then(() => {
-        goDoctorList();
+        setShowPwdModal(true);
       });
     }
-  }, [submitError, goDoctorList, isUpdate]);
+  }, [submitError, isUpdate]);
 
   const handleSubmit = () => {
     form
@@ -153,6 +166,46 @@ export default function ProjectForm() {
           </Item>
         </Form>
       )}
+      <Modal
+        title='医生管理'
+        visible={showPwdModal}
+        onOk={handleModalClose}
+        onCancel={handleModalClose}
+        maskClosable={false}
+      >
+        {updateDoctorResponse && (
+          <div>
+            <p>
+              账号：
+              <Tag color='success'>{updateDoctorResponse.name}</Tag>
+              <Clipboard
+                title='复制账号至剪切板'
+                component='span'
+                onSuccess={copySuccess}
+                data-clipboard-text={updateDoctorResponse.name}
+              >
+                <Button>复制账号至剪切板</Button>
+              </Clipboard>
+            </p>
+            <p>
+              密码：
+              <Tag color='success'>{updateDoctorResponse.password}</Tag>
+              <Clipboard
+                title='复制密码至剪切板'
+                component='span'
+                onSuccess={copySuccess}
+                data-clipboard-text={updateDoctorResponse.password}
+              >
+                <Button>复制密码至剪切板</Button>
+              </Clipboard>
+            </p>
+            <p>
+              医生账号为<strong>医生姓名</strong>，密码可
+              <strong>医生详情</strong>中查看
+            </p>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
