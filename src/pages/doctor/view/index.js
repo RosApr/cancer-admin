@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Tag, Button, Table } from 'antd';
+import { Tag, Button, Table, Message } from 'antd';
+import Clipboard from 'react-clipboard.js';
 import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { fetchDoctorDetailApi } from '@/api/doctor';
 import { useFetchDataOnMount, useNavigate } from '@/utils/requestHook';
@@ -77,6 +78,7 @@ export default function DoctorView() {
   const handlePageChange = e => {
     setCurrent(e);
   };
+  const copySuccess = () => Message.success('复制成功');
   return (
     <div className='doctor-detail-page'>
       {responseMemo && (
@@ -86,6 +88,17 @@ export default function DoctorView() {
           </DetailItem>
           <DetailItem itemWidth label='医生姓名'>
             {responseMemo.name}
+          </DetailItem>
+          <DetailItem itemWidth label='密码'>
+            <Tag color='success'>{responseMemo.password}</Tag>
+            <Clipboard
+              title='复制密码至剪切板'
+              component='span'
+              onSuccess={copySuccess}
+              data-clipboard-text={responseMemo.password}
+            >
+              <Button>复制密码至剪切板</Button>
+            </Clipboard>
           </DetailItem>
           <DetailItem label='职称'>{responseMemo.position}</DetailItem>
           <DetailItem label='联系电话'>{responseMemo.telphone}</DetailItem>

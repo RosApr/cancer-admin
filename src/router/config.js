@@ -23,7 +23,7 @@ export const routeMap = [
     path: '/app/project/view/:cancer_id/:project_id',
     main: lazy(() => import('@/pages/project/view/index')),
     role: [ROLE_USER],
-    state: { meta: '项目' },
+    state: { meta: '项目详情' },
     isInMenu: !1,
   },
   // 更新|新增
@@ -48,7 +48,7 @@ export const routeMap = [
     path: '/app/doctor/view/:doctor_id',
     main: lazy(() => import('@/pages/doctor/view/index')),
     role: [ROLE_USER],
-    state: { meta: '医生' },
+    state: { meta: '医生详情' },
     isInMenu: !1,
   },
   {

@@ -211,21 +211,6 @@ export default function Dashboard() {
     delDoctor,
   ] = useRequest(delDoctorCallback);
 
-  // useEffect(() => {
-  //   if (delDoctorError.status === 0 && delDoctorResponse) {
-  //     const _doctorList = [...doctorList.list];
-  //     _doctorList.splice(
-  //       _doctorList.findIndex(({ id }) => id === delDoctorRequestData),
-  //       1
-  //     );
-  //     setDoctorList({
-  //       list: _doctorList,
-  //       total: _doctorList.length || 0,
-  //     });
-  //     delDoctorError.status = 2;
-  //   }
-  // }, [delDoctorError, doctorList, delDoctorResponse, delDoctorRequestData]);
-
   useRequestResult({
     response: delDoctorResponse,
     requestData: delDoctorRequestData,
