@@ -293,13 +293,15 @@ export default function ProjectForm() {
           >
             <Input />
           </Item>
-          <Item name='isRegister' label='微信绑定' valuePropName='checked'>
-            <Switch
-              disabled
-              checkedChildren='已绑定'
-              unCheckedChildren='未绑定'
-            />
-          </Item>
+          {isUpdate && (
+            <Item name='isRegister' label='微信绑定' valuePropName='checked'>
+              <Switch
+                disabled
+                checkedChildren='已绑定'
+                unCheckedChildren='未绑定'
+              />
+            </Item>
+          )}
           <Item label='职称' name='position'>
             <Input />
           </Item>
@@ -321,7 +323,6 @@ export default function ProjectForm() {
                 pagination={{
                   current: current,
                   pageSize: 5,
-                  // total: projectList.length || 0,
                   showSizeChanger: false,
                   hideOnSinglePage: true,
                   onChange: handlePageChange,
