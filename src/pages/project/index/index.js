@@ -11,6 +11,7 @@ import {
   useRequestResult,
 } from '@/utils/requestHook';
 import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
+import { ProjectfilterFormConfig } from '@/utils/consts';
 import './index.scss';
 
 const makeTableColumns = (
@@ -91,44 +92,12 @@ const makeTableColumns = (
   },
 ];
 
-const filterFormConfig = [
-  {
-    key: 'cancer_id',
-    list: [],
-    defaultValue: 0,
-    placeholder: '请选择癌症',
-    isFullMatch: true,
-    value: 0,
-  },
-  {
-    key: 'description',
-    defaultValue: '',
-    placeholder: '请输入项目描述',
-    isFullMatch: false,
-    value: '',
-  },
-  {
-    key: 'exclusion',
-    defaultValue: '',
-    placeholder: '请输入项目排除标准',
-    isFullMatch: false,
-    value: '',
-  },
-  {
-    key: 'acceptance',
-    defaultValue: '',
-    placeholder: '请输入项目入组标准',
-    isFullMatch: false,
-    value: '',
-  },
-];
-
 const projectListConfig = {
   list: [],
   total: 0,
 };
 
-export default function Dashboard() {
+export default function ProjectIndex() {
   const { history } = useNavigate();
 
   const [projectList, setProjectList] = useState(() => projectListConfig);
@@ -147,14 +116,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (fetchCancerListError.status === 0 && fetchCancerListResponse) {
-      const cancerSelect = filterFormConfig.filter(
+      const cancerSelect = ProjectfilterFormConfig.filter(
         item => item.key === 'cancer_id'
       )[0];
       cancerSelect['list'] = [
         { id: 0, name: '全部' },
         ...fetchCancerListResponse,
       ];
-      setTableFilter(initTableFilterConfig(filterFormConfig));
+      setTableFilter(initTableFilterConfig(ProjectfilterFormConfig));
     }
   }, [fetchCancerListResponse, fetchCancerListError]);
 
@@ -269,7 +238,7 @@ export default function Dashboard() {
           left={() => {
             return (
               <ListFilterForm
-                config={filterFormConfig}
+                config={ProjectfilterFormConfig}
                 onSearch={handleFilterChange}
               />
             );

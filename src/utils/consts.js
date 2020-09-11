@@ -8,7 +8,7 @@ export const ACCOUNT_USER = 'adm';
 export const ACCOUNT_ADMIN = 'root';
 
 export const FORM_ITEM_LAYOUT = {
-  labelCol: { span: 8 },
+  labelCol: { span: 6 },
   wrapperCol: { span: 10 },
 };
 
@@ -27,3 +27,43 @@ export const PROCESS_CONFIG = [
     value: 1,
   },
 ];
+
+export const ProjectfilterFormConfig = [
+  {
+    key: 'cancer_id',
+    list: [],
+    defaultValue: 0,
+    placeholder: '请选择癌症',
+    isFullMatch: true,
+    value: 0,
+  },
+  {
+    key: 'description',
+    defaultValue: '',
+    placeholder: '请输入项目描述',
+    isFullMatch: false,
+    value: '',
+  },
+  {
+    key: 'exclusion',
+    defaultValue: '',
+    placeholder: '请输入项目排除标准',
+    isFullMatch: false,
+    value: '',
+  },
+  {
+    key: 'acceptance',
+    defaultValue: '',
+    placeholder: '请输入项目入组标准',
+    isFullMatch: false,
+    value: '',
+  },
+];
+
+export const fetchProjectDefaultParams = ProjectfilterFormConfig.reduce(
+  (result, current) => {
+    result[current['key']] = current.value;
+    return result;
+  },
+  {}
+);

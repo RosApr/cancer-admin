@@ -1,4 +1,5 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import Clipboard from 'react-clipboard.js';
 import {
   Button,
@@ -10,20 +11,21 @@ import {
   message as Message,
   Modal,
   Tag,
+  Table,
 } from 'antd';
-
+import { fetchProjectListApi } from '@/api/project';
 import {
   addDoctorApi,
   updateDoctorApi,
   fetchDoctorDetailApi,
 } from '@/api/doctor';
-// import { fetchCancersApi } from '@/api/cancer';
+import { fetchCancersApi } from '@/api/cancer';
 import {
   useNavigate,
   useFetchDataOnMount,
   useRequest,
 } from '@/utils/requestHook';
-import { FORM_ITEM_LAYOUT } from '@/utils/consts';
+import { FORM_ITEM_LAYOUT, fetchProjectDefaultParams } from '@/utils/consts';
 import { useReturnCurrentFormStatus } from '@/utils/requestHook';
 import './index.scss';
 
@@ -36,7 +38,58 @@ const initialFormData = {
   telphone: '',
   visit_time: '',
   isRegister: false,
+  projects: [],
 };
+// const tableColumns = [
+//   {
+//     title: 'id',
+//     dataIndex: 'id',
+//     align: 'center',
+//     width: 50,
+//   },
+//   {
+//     title: '项目描述',
+//     dataIndex: 'description',
+//     align: 'center',
+//     width: 240,
+//     render: input => input || 0,
+//   },
+//   {
+//     title: '所属病症',
+//     dataIndex: 'cancer',
+//     align: 'center',
+//     width: 120,
+//     render: input => input.name || 0,
+//   },
+//   {
+//     title: '提交人数',
+//     dataIndex: 'submit_patients_num',
+//     align: 'center',
+//     render: input => input || 0,
+//   },
+//   {
+//     title: '入组人数',
+//     dataIndex: 'accept_patients_num',
+//     align: 'center',
+//     render: input => input || 0,
+//   },
+//   {
+//     title: '项目状态',
+//     dataIndex: 'progress',
+//     align: 'center',
+//     width: 120,
+//     render: input =>
+//       input === 0 ? (
+//         <Tag icon={<SyncOutlined spin />} color='processing'>
+//           正在进行
+//         </Tag>
+//       ) : (
+//         <Tag icon={<MinusCircleOutlined />} color='cyan'>
+//           已结束
+//         </Tag>
+//       ),
+//   },
+// ];
 
 export default function ProjectForm() {
   const { params, history } = useNavigate();
@@ -47,31 +100,55 @@ export default function ProjectForm() {
 
   const [formInitialData, setFormInitialData] = useState(null);
 
-  const fetchDoctorCallback = useCallback(() => {
+  const [projectList, setProjectList] = useState([]);
+
+  const [cancerList, setCancerList] = useState([]);
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+  const fetchDataWhenIsUpdateCallback = useCallback(() => {
     if (isUpdate === null) return;
     if (isUpdate) {
-      return fetchDoctorDetailApi(params.doctor_id);
+      return Promise.all([
+        fetchDoctorDetailApi(params.doctor_id),
+        fetchProjectListApi(fetchProjectDefaultParams),
+        fetchCancersApi(),
+      ]);
     }
     return null;
-  }, [isUpdate, params]);
+  }, [params, isUpdate]);
 
   const {
-    response: fetchDoctorResponse,
-    error: fetchDoctorError,
-  } = useFetchDataOnMount(fetchDoctorCallback);
+    response: fetchDataWhenIsUpdateResponse,
+    error: fetchDataWhenIsUpdateError,
+  } = useFetchDataOnMount(fetchDataWhenIsUpdateCallback);
 
   useEffect(() => {
     if (isUpdate !== null) {
-      if (isUpdate && fetchDoctorError.status === 0 && fetchDoctorResponse) {
+      if (
+        isUpdate &&
+        fetchDataWhenIsUpdateError.status === 0 &&
+        fetchDataWhenIsUpdateResponse
+      ) {
         setFormInitialData({
           ...initialFormData,
-          ...fetchDoctorResponse,
+          ...fetchDataWhenIsUpdateResponse[0],
         });
+        setSelectedRowKeys(
+          fetchDataWhenIsUpdateResponse[0]['projects'].map(item => item.id)
+        );
+        setProjectList(fetchDataWhenIsUpdateResponse[1]);
+        setCancerList(
+          fetchDataWhenIsUpdateResponse[2].map(({ id, name }) => ({
+            value: id,
+            text: name,
+          }))
+        );
       } else if (!isUpdate) {
         setFormInitialData(initialFormData);
       }
     }
-  }, [isUpdate, fetchDoctorError, fetchDoctorResponse]);
+  }, [isUpdate, fetchDataWhenIsUpdateResponse, fetchDataWhenIsUpdateError]);
 
   const goDoctorList = useCallback(() => history.push('/app/doctor/index'), [
     history,
@@ -95,7 +172,9 @@ export default function ProjectForm() {
   ] = useRequest(submitCb);
 
   const copySuccess = () => Message.success('复制成功');
+
   const [showPwdModal, setShowPwdModal] = useState(false);
+
   const handleModalClose = () => {
     setShowPwdModal(false);
     goDoctorList();
@@ -118,13 +197,87 @@ export default function ProjectForm() {
         // name field is untouched and not empty or in edit
         // and name equal edit init name
         delete values.isRegister;
-        return submit(params.doctor_id, values);
+        return submit(params.doctor_id, {
+          ...values,
+          project_ids: selectedRowKeys,
+        });
       })
       .catch(error => {});
   };
 
+  const [current, setCurrent] = useState(1);
+
+  const handlePageChange = e => setCurrent(e);
+
+  const tableColumns = useMemo(() => {
+    if (isUpdate === null) return [];
+    if (isUpdate) {
+      return [
+        {
+          title: 'id',
+          dataIndex: 'id',
+          align: 'center',
+          width: 50,
+        },
+        {
+          title: '项目描述',
+          dataIndex: 'description',
+          align: 'center',
+          width: 240,
+          render: input => input || 0,
+        },
+        {
+          title: '所属病症',
+          dataIndex: 'cancer',
+          align: 'center',
+          width: 120,
+          render: input => input.name || 0,
+          filters: cancerList,
+          onFilter: (value, record) => {
+            return value === record.cancer.id;
+          },
+        },
+        {
+          title: '提交人数',
+          dataIndex: 'submit_patients_num',
+          align: 'center',
+          render: input => input || 0,
+        },
+        {
+          title: '入组人数',
+          dataIndex: 'accept_patients_num',
+          align: 'center',
+          render: input => input || 0,
+        },
+        {
+          title: '项目状态',
+          dataIndex: 'progress',
+          align: 'center',
+          width: 120,
+          render: input =>
+            input === 0 ? (
+              <Tag icon={<SyncOutlined spin />} color='processing'>
+                正在进行
+              </Tag>
+            ) : (
+              <Tag icon={<MinusCircleOutlined />} color='cyan'>
+                已结束
+              </Tag>
+            ),
+        },
+      ];
+    }
+  }, [cancerList, isUpdate]);
+
+  const rowSelection = useMemo(
+    () => ({
+      selectedRowKeys,
+      onChange: selected => setSelectedRowKeys(selected),
+    }),
+    [selectedRowKeys]
+  );
   return (
-    <div className='dashboard-layer'>
+    <div className='doctor-form-layer'>
       {formInitialData && (
         <Form
           form={form}
@@ -156,6 +309,26 @@ export default function ProjectForm() {
           <Item label='门诊时间' name='visit_time'>
             <Input />
           </Item>
+          {projectList.length > 0 && (
+            <Item label='负责项目' name='project_ids' wrapperCol={{ span: 16 }}>
+              <Table
+                rowKey='id'
+                bordered
+                rowSelection={rowSelection}
+                columns={tableColumns}
+                dataSource={projectList || []}
+                className='table'
+                pagination={{
+                  current: current,
+                  pageSize: 5,
+                  // total: projectList.length || 0,
+                  showSizeChanger: false,
+                  hideOnSinglePage: true,
+                  onChange: handlePageChange,
+                }}
+              ></Table>
+            </Item>
+          )}
           <Item wrapperCol={{ span: 24 }} className='center'>
             <Space size='middle'>
               <Button type='primary' onClick={handleSubmit}>
@@ -166,6 +339,7 @@ export default function ProjectForm() {
           </Item>
         </Form>
       )}
+
       <Modal
         title='医生管理'
         visible={showPwdModal}
