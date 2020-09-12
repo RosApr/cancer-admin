@@ -53,7 +53,7 @@ const makeTableColumns = (
       input ? (
         <Tag color='success'>已绑定</Tag>
       ) : (
-        <Tag color='warning'>未绑定</Tag>
+        <Tag color='error'>未绑定</Tag>
       ),
   },
 

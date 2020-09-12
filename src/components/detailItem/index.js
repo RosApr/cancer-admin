@@ -9,7 +9,7 @@ const DetailItem = ({
   children,
   require,
 }) => {
-  const span = labelWidth ? {} : { span: 7 };
+  const span = labelWidth ? {} : { span: 6 };
   const itemSpan = itemWidth ? { flex: '1 0' } : { span: 13 };
   return (
     <Row className='detail-item' justify='flex-start' align='top'>

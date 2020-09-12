@@ -11,6 +11,12 @@ export const useRequestResult = ({
   cb = null,
   messageTip = '',
 }) => {
+  const [isShowSuccessTip, setIsShowSuccessTip] = useState(false);
+  useEffect(() => {
+    if (error.status === 2) {
+      setIsShowSuccessTip(false);
+    }
+  }, [error]);
   useEffect(() => {
     const { status, message = '' } = error;
     if (status === 1) {
@@ -18,7 +24,8 @@ export const useRequestResult = ({
         Message.error({
           content: message,
         });
-    } else if (status === 0) {
+    } else if (status === 0 && !isShowSuccessTip) {
+      setIsShowSuccessTip(true);
       Message.success(messageTip || '操作成功').then(() => {
         cb && cb(requestData, response);
       });

@@ -107,7 +107,7 @@ export default function DoctorView() {
             {responseMemo.isRegister ? (
               <Tag color='success'>已绑定</Tag>
             ) : (
-              <Tag color='warning'>未绑定</Tag>
+              <Tag color='error'>未绑定</Tag>
             )}
           </DetailItem>
           <DetailItem label='负责项目'>
