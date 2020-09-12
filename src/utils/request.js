@@ -8,6 +8,8 @@ const service = Axios.create({
   baseUrl: process.env.REACT_APP_REQUEST_BASE_URL,
   timeout: 10000,
 });
+const loginHref = window.location.origin + '/#/login';
+
 service.defaults.headers.post['Content-Type'] =
   'application/x-www-form-urlencoded; charset=UTF-8';
 service.interceptors.request.use(
@@ -32,7 +34,7 @@ service.interceptors.response.use(
     globalLoadingInstance.hide();
     if (status === 401) {
       // no permession to access -> navigate to login page
-      window.location.href = '/login';
+      window.location.href = loginHref;
     }
     if (status === 200) {
       return Promise.resolve(data);
@@ -50,7 +52,7 @@ service.interceptors.response.use(
     } = error;
     if (status === 401) {
       // no permession to access -> navigate to login page
-      window.location.href = '/login';
+      window.location.href = loginHref;
     }
     // need optimize
     if (status === 403) {
