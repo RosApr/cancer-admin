@@ -82,7 +82,7 @@ const makeTableColumns = (goPatientEdit = () => {}, delPatient = () => {}) => [
     title: '入组情况',
     dataIndex: 'isAccepted',
     align: 'center',
-    render: input =>
+    render: (input = true) =>
       input ? (
         <Tag color='success'>已入组</Tag>
       ) : (
@@ -301,7 +301,7 @@ export default function ProjectView() {
               </Tag>
             )}
           </DetailItem>
-          <DetailItem itemWidth label='项目进度'>
+          <DetailItem itemWidth label='病人详情'>
             <Button type='primary' onClick={addPatient}>
               新增病人
             </Button>
