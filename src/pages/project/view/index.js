@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import {
   Tag,
   Button,
@@ -8,6 +8,7 @@ import {
   Modal,
   Form,
   Input,
+  Switch,
 } from 'antd';
 import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { fetchProjectDetailApi } from '@/api/project';
@@ -35,6 +36,7 @@ const initialFormData = {
   bank_card_num: '',
   telphone: '',
   illness_description: '',
+  isAccepted: true,
 };
 const objectToArray = (object = {}) => {
   const config = Object.entries(object);
@@ -164,9 +166,12 @@ export default function ProjectView() {
   const [formInitialData, setFormInitialData] = useState(null);
 
   const submitPatientCallback = useCallback(
-    data => {
+    formData => {
       if (!formInitialData) return;
-      const formData = { ...data, project_id: +params.project_id };
+      if (formData.isAccepted && formInitialData.hasOwnProperty('id')) {
+        formData['project_id'] = +params.project_id;
+      }
+      delete formData.isAccepted;
       if (formInitialData.hasOwnProperty('id')) {
         return updatePatientApi(formInitialData.id, formData);
       } else {
@@ -203,7 +208,7 @@ export default function ProjectView() {
     },
   });
 
-  const addPatient = () => {
+  const goAddPatient = () => {
     form.setFields(initialFormDataArray);
     setFormInitialData(initialFormData);
     setShowPatientForm(true);
@@ -214,6 +219,9 @@ export default function ProjectView() {
       ...initialFormData,
       ...patientList.filter(item => item.id === id)[0],
     };
+    if (!formData.bank_card_num) {
+      formData.bank_card_num = '';
+    }
     setFormInitialData(formData);
     form.setFields(objectToArray(formData));
     setShowPatientForm(true);
@@ -266,6 +274,14 @@ export default function ProjectView() {
     setShowPatientForm(false);
   };
 
+  const switchStatusMemo = useMemo(() => {
+    if (!formInitialData) return true;
+    if (formInitialData && formInitialData.hasOwnProperty('id')) {
+      return false;
+    }
+    return true;
+  }, [formInitialData]);
+
   return (
     <div className='project-detail-page'>
       {projectDetail && (
@@ -310,7 +326,7 @@ export default function ProjectView() {
             )}
           </DetailItem>
           <DetailItem itemWidth label='病人详情'>
-            <Button type='primary' onClick={addPatient}>
+            <Button type='primary' onClick={goAddPatient}>
               新增病人
             </Button>
             <Table
@@ -362,6 +378,13 @@ export default function ProjectView() {
             rules={[{ required: true, message: '请填写姓名' }]}
           >
             <Input />
+          </Item>
+          <Item name='isAccepted' label='入组情况' valuePropName='checked'>
+            <Switch
+              disabled={switchStatusMemo}
+              checkedChildren='是'
+              unCheckedChildren='否'
+            />
           </Item>
           <Item label='身份证号' name='id_card'>
             <Input />
