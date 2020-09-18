@@ -222,6 +222,9 @@ export default function ProjectView() {
     if (!formData.bank_card_num) {
       formData.bank_card_num = '';
     }
+    if (!formData.id_card) {
+      formData.id_card = '';
+    }
     setFormInitialData(formData);
     form.setFields(objectToArray(formData));
     setShowPatientForm(true);
