@@ -9,6 +9,29 @@ import {
 import { ROLE_USER, ROLE_ADMIN, ROLE_ANONYMOUS } from '@/utils/consts.js';
 
 export const routeMap = [
+  {
+    path: '/app/cancer/index',
+    main: lazy(() => import('@/pages/cancer/index/index')),
+    role: [ROLE_USER],
+    state: { meta: '癌症管理' },
+    isInMenu: !!1,
+    menuIcon: SolutionOutlined,
+  },
+  // 详情
+  {
+    path: '/app/cancer/view/:cancer_id',
+    main: lazy(() => import('@/pages/cancer/view/index')),
+    role: [ROLE_USER],
+    state: { meta: '癌症详情' },
+    isInMenu: !1,
+  },
+  {
+    path: '/app/cancer/form/:operationType/:cancer_id?',
+    main: lazy(() => import('@/pages/cancer/form/index')),
+    role: [ROLE_USER],
+    state: { meta: '癌症更新' },
+    isInMenu: !1,
+  },
   // 列表
   {
     path: '/app/project/index',
@@ -16,7 +39,7 @@ export const routeMap = [
     role: [ROLE_USER],
     state: { meta: '项目管理' },
     isInMenu: !!1,
-    menuIcon: HomeOutlined,
+    menuIcon: ShopOutlined,
   },
   // 详情
   {
@@ -41,7 +64,7 @@ export const routeMap = [
     role: [ROLE_USER],
     state: { meta: '医生管理' },
     isInMenu: !!1,
-    menuIcon: HomeOutlined,
+    menuIcon: UnorderedListOutlined,
   },
   // 详情
   {
