@@ -4,12 +4,7 @@ import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
 // import { fetchCancersApi } from '@/api/cancer';
 import { fetchDoctorListApi, delDoctorApi } from '@/api/doctor';
-import {
-  useNavigate,
-  useFetchDataOnMount,
-  useRequest,
-  useRequestResult,
-} from '@/utils/requestHook';
+import { useNavigate, useRequest, useRequestResult } from '@/utils/requestHook';
 import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
 import './index.scss';
 
@@ -37,6 +32,11 @@ const makeTableColumns = (
   {
     title: '联系电话',
     dataIndex: 'telphone',
+    align: 'center',
+  },
+  {
+    title: '手机号',
+    dataIndex: 'mobile_phone',
     align: 'center',
   },
   {

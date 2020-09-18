@@ -36,6 +36,7 @@ const initialFormData = {
   name: '',
   position: '',
   telphone: '',
+  mobile_phone: '',
   visit_time: '',
   isRegister: false,
   projects: [],
@@ -306,6 +307,9 @@ export default function ProjectForm() {
             <Input />
           </Item>
           <Item label='联系电话' name='telphone'>
+            <Input />
+          </Item>
+          <Item label='手机号' name='mobile_phone'>
             <Input />
           </Item>
           <Item label='门诊时间' name='visit_time'>

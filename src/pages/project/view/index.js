@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   Tag,
   Button,
@@ -32,6 +32,7 @@ const { Item } = Form;
 const initialFormData = {
   name: '',
   id_card: '',
+  bank_card_num: '',
   telphone: '',
   illness_description: '',
 };
@@ -64,6 +65,11 @@ const makeTableColumns = (goPatientEdit = () => {}, delPatient = () => {}) => [
   {
     title: '身份证号',
     dataIndex: 'id_card',
+    align: 'center',
+  },
+  {
+    title: '银行卡号',
+    dataIndex: 'bank_card_num',
     align: 'center',
   },
   {
@@ -266,7 +272,9 @@ export default function ProjectView() {
         <div>
           <DetailItem itemWidth label='负责医生'>
             {projectDetail.person_in_charge}
-            <Tag color='blue'>{projectDetail.doctor_position}</Tag>
+            <Tag style={{ margin: '0 4px' }} color='blue'>
+              {projectDetail.doctor_position}
+            </Tag>
             {projectDetail.doctor_telphone
               ? ` | ${projectDetail.doctor_telphone}`
               : ''}
@@ -356,6 +364,9 @@ export default function ProjectView() {
             <Input />
           </Item>
           <Item label='身份证号' name='id_card'>
+            <Input />
+          </Item>
+          <Item label='银行卡号' name='bank_card_num'>
             <Input />
           </Item>
           <Item label='联系电话' name='telphone'>

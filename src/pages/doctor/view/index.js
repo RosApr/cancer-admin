@@ -102,6 +102,7 @@ export default function DoctorView() {
           </DetailItem>
           <DetailItem label='职称'>{responseMemo.position}</DetailItem>
           <DetailItem label='联系电话'>{responseMemo.telphone}</DetailItem>
+          <DetailItem label='手机号'>{responseMemo.mobile_phone}</DetailItem>
           <DetailItem label='门诊时间'>{responseMemo.visit_time}</DetailItem>
           <DetailItem label='微信绑定'>
             {responseMemo.isRegister ? (

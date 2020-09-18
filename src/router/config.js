@@ -31,7 +31,7 @@ export const routeMap = [
     path: '/app/project/form/:operationType/:cancer_id?/:project_id?',
     main: lazy(() => import('@/pages/project/form/index')),
     role: [ROLE_USER],
-    state: { meta: '项目' },
+    state: { meta: '项目更新' },
     isInMenu: !1,
   },
   // 列表
@@ -55,7 +55,7 @@ export const routeMap = [
     path: '/app/doctor/form/:operationType/:doctor_id?',
     main: lazy(() => import('@/pages/doctor/form/index')),
     role: [ROLE_USER],
-    state: { meta: '医生' },
+    state: { meta: '医生更新' },
     isInMenu: !1,
   },
   // 登录
