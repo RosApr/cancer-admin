@@ -30,7 +30,7 @@ export const useRequestResult = ({
         cb && cb(requestData, response);
       });
     }
-  }, [error, cb, requestData, messageTip, response]);
+  }, [isShowSuccessTip, error, cb, requestData, messageTip, response]);
 };
 
 // post
