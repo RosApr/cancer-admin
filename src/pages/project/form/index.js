@@ -217,10 +217,11 @@ export default function ProjectForm() {
           )}
 
           <Item name='person_in_charge' label='负责医生'>
-            <Select>
+            <Select showSearch>
               {doctorList.map(({ name, position, telphone, visit_time }) => (
                 <Option value={name} key={name}>
-                  {name} | <Tag color='blue'>{position}</Tag>
+                  <span className='doctor-name'>{name}</span>
+                  {position && <Tag color='blue'>{position}</Tag>}
                   {telphone ? ` | ${telphone}` : ''}
                   {visit_time ? ` |  门诊时间：${visit_time}` : ''}
                 </Option>
