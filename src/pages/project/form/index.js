@@ -190,7 +190,7 @@ export default function ProjectForm() {
   };
 
   return (
-    <div className='dashboard-layer'>
+    <div className='project-form-layer'>
       {formInitialData && doctorList.length > 0 && (
         <Form
           form={form}

@@ -232,7 +232,7 @@ export default function ProjectIndex() {
 
   const tableColumns = makeTableColumns(goEdit, goView, del);
   return (
-    <div className='dashboard-layer'>
+    <div className='project-index-layer'>
       {fetchCancerListResponse && tableFilter && (
         <TableFilterContainer
           left={() => {
