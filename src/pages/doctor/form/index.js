@@ -38,6 +38,7 @@ const initialFormData = {
   telphone: '',
   mobile_phone: '',
   visit_time: '',
+  isAdmin: false,
   isRegister: false,
   projects: [],
 };
@@ -295,7 +296,7 @@ export default function ProjectForm() {
             <Input />
           </Item>
           {isUpdate && (
-            <Item name='isRegister' label='微信绑定' valuePropName='checked'>
+            <Item label='微信绑定' name='isRegister' valuePropName='checked'>
               <Switch
                 disabled
                 checkedChildren='已绑定'
@@ -305,6 +306,9 @@ export default function ProjectForm() {
           )}
           <Item label='职称' name='position'>
             <Input />
+          </Item>
+          <Item label='管理员' name='isAdmin' valuePropName='checked'>
+            <Switch checkedChildren='是' unCheckedChildren='否' />
           </Item>
           <Item label='联系电话' name='telphone'>
             <Input />
