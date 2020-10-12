@@ -101,6 +101,13 @@ export default function DoctorView() {
             </Clipboard>
           </DetailItem>
           <DetailItem label='职称'>{responseMemo.position}</DetailItem>
+          <DetailItem label='管理员'>
+            {responseMemo.isAdmin ? (
+              <Tag color='success'>是</Tag>
+            ) : (
+              <Tag color='default'>否</Tag>
+            )}
+          </DetailItem>
           <DetailItem label='联系电话'>{responseMemo.telphone}</DetailItem>
           <DetailItem label='手机号'>{responseMemo.mobile_phone}</DetailItem>
           <DetailItem label='门诊时间'>{responseMemo.visit_time}</DetailItem>
