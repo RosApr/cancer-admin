@@ -30,6 +30,13 @@ const makeTableColumns = (
     align: 'center',
   },
   {
+    title: '管理员',
+    dataIndex: 'isAdmin',
+    align: 'center',
+    render: input =>
+      input ? <Tag color='success'>是</Tag> : <Tag color='default'>否</Tag>,
+  },
+  {
     title: '联系电话',
     dataIndex: 'telphone',
     align: 'center',
