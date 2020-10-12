@@ -98,6 +98,27 @@ const filterFormConfig = [
     isFullMatch: false,
     value: '',
   },
+  {
+    key: 'isAdmin',
+    defaultValue: '',
+    isFullMatch: true,
+    value: '',
+    placeholder: '请选择医生类别',
+    list: [
+      {
+        id: '',
+        name: '全部',
+      },
+      {
+        id: true,
+        name: '管理员',
+      },
+      {
+        id: false,
+        name: '非管理员',
+      },
+    ],
+  },
 ];
 
 const doctorListConfig = {
