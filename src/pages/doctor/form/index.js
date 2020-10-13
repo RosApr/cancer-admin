@@ -1,17 +1,27 @@
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
+import {
+  SyncOutlined,
+  MinusCircleOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
 import Clipboard from 'react-clipboard.js';
 import {
   Button,
   Input,
   Form,
-  Space,
   // Select,
   Switch,
   message as Message,
   Modal,
   Tag,
   Table,
+  Space,
 } from 'antd';
 import { fetchProjectListApi } from '@/api/project';
 import {
@@ -211,6 +221,72 @@ export default function ProjectForm() {
 
   const handlePageChange = e => setCurrent(e);
 
+  const [searchText, setSearchText] = useState('');
+  const projectTableIdSearchInput = useRef(null);
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+  };
+
+  const handleReset = clearFilters => {
+    clearFilters();
+    setSearchText('');
+  };
+  const getColumnSearchProps = useCallback(
+    dataIndex => ({
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            ref={projectTableIdSearchInput}
+            placeholder={`Search ${dataIndex}`}
+            value={selectedKeys[0]}
+            onChange={e =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Space>
+            <Button
+              type='primary'
+              onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+              icon={<SearchOutlined />}
+              size='small'
+              style={{ width: 90 }}
+            >
+              搜索
+            </Button>
+            <Button
+              onClick={() => handleReset(clearFilters)}
+              size='small'
+              style={{ width: 90 }}
+            >
+              重置
+            </Button>
+          </Space>
+        </div>
+      ),
+      filterIcon: filtered => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        return record[dataIndex] === +value;
+      },
+      onFilterDropdownVisibleChange: visible => {
+        if (visible) {
+          setTimeout(() => projectTableIdSearchInput.current.focus(), 100);
+        }
+      },
+      render: text => text,
+    }),
+    []
+  );
+
   const tableColumns = useMemo(() => {
     if (isUpdate === null) return [];
     if (isUpdate) {
@@ -220,6 +296,11 @@ export default function ProjectForm() {
           dataIndex: 'id',
           align: 'center',
           width: 50,
+          sorter: (prevId, nextId) => {
+            return prevId.id - nextId.id;
+          },
+          sortDirections: ['descend', 'ascend'],
+          ...getColumnSearchProps('id'),
         },
         {
           title: '项目描述',
@@ -269,7 +350,7 @@ export default function ProjectForm() {
         },
       ];
     }
-  }, [cancerList, isUpdate]);
+  }, [cancerList, isUpdate, getColumnSearchProps]);
 
   const rowSelection = useMemo(
     () => ({
