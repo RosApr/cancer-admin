@@ -1,24 +1,15 @@
-import React, {
-  useCallback,
-  useState,
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react';
-import {
-  SyncOutlined,
-  MinusCircleOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import Clipboard from 'react-clipboard.js';
+import difference from 'lodash/difference';
 import {
   Button,
   Input,
   Form,
-  // Select,
-  Switch,
   message as Message,
   Modal,
+  Transfer,
+  Switch,
   Tag,
   Table,
   Space,
@@ -39,7 +30,6 @@ import { FORM_ITEM_LAYOUT, fetchProjectDefaultParams } from '@/utils/consts';
 import { useReturnCurrentFormStatus } from '@/utils/requestHook';
 import './index.scss';
 
-// const { Option } = Select;
 const { Item } = Form;
 
 const initialFormData = {
@@ -52,56 +42,54 @@ const initialFormData = {
   isRegister: false,
   projects: [],
 };
-// const tableColumns = [
-//   {
-//     title: 'id',
-//     dataIndex: 'id',
-//     align: 'center',
-//     width: 50,
-//   },
-//   {
-//     title: '项目描述',
-//     dataIndex: 'description',
-//     align: 'center',
-//     width: 240,
-//     render: input => input || 0,
-//   },
-//   {
-//     title: '所属病症',
-//     dataIndex: 'cancer',
-//     align: 'center',
-//     width: 120,
-//     render: input => input.name || 0,
-//   },
-//   {
-//     title: '提交人数',
-//     dataIndex: 'submit_patients_num',
-//     align: 'center',
-//     render: input => input || 0,
-//   },
-//   {
-//     title: '入组人数',
-//     dataIndex: 'accept_patients_num',
-//     align: 'center',
-//     render: input => input || 0,
-//   },
-//   {
-//     title: '项目状态',
-//     dataIndex: 'progress',
-//     align: 'center',
-//     width: 120,
-//     render: input =>
-//       input === 0 ? (
-//         <Tag icon={<SyncOutlined spin />} color='processing'>
-//           正在进行
-//         </Tag>
-//       ) : (
-//         <Tag icon={<MinusCircleOutlined />} color='cyan'>
-//           已结束
-//         </Tag>
-//       ),
-//   },
-// ];
+
+const TableTransfer = ({ leftColumns, rightColumns, ...restProps }) => (
+  <Transfer {...restProps} showSelectAll={false}>
+    {({
+      direction,
+      filteredItems,
+      onItemSelectAll,
+      onItemSelect,
+      selectedKeys: listSelectedKeys,
+      disabled: listDisabled,
+    }) => {
+      const columns = direction === 'left' ? leftColumns : rightColumns;
+
+      const rowSelection = {
+        getCheckboxProps: item => ({ disabled: listDisabled || item.disabled }),
+        onSelectAll(selected, selectedRows) {
+          const treeSelectedKeys = selectedRows
+            .filter(item => !item.disabled)
+            .map(({ key }) => key);
+          const diffKeys = selected
+            ? difference(treeSelectedKeys, listSelectedKeys)
+            : difference(listSelectedKeys, treeSelectedKeys);
+          onItemSelectAll(diffKeys, selected);
+        },
+        onSelect({ key }, selected) {
+          onItemSelect(key, selected);
+        },
+        selectedRowKeys: listSelectedKeys,
+      };
+
+      return (
+        <Table
+          rowSelection={rowSelection}
+          columns={columns}
+          dataSource={filteredItems}
+          size='small'
+          style={{ pointerEvents: listDisabled ? 'none' : null }}
+          onRow={({ key, disabled: itemDisabled }) => ({
+            onClick: () => {
+              if (itemDisabled || listDisabled) return;
+              onItemSelect(key, !listSelectedKeys.includes(key));
+            },
+          })}
+        />
+      );
+    }}
+  </Transfer>
+);
 
 export default function ProjectForm() {
   const { params, history } = useNavigate();
@@ -149,7 +137,12 @@ export default function ProjectForm() {
         setSelectedRowKeys(
           fetchDataWhenIsUpdateResponse[0]['projects'].map(item => item.id)
         );
-        setProjectList(fetchDataWhenIsUpdateResponse[1]);
+        setProjectList(
+          fetchDataWhenIsUpdateResponse[1].map(item => ({
+            ...item,
+            key: item.id,
+          }))
+        );
         setCancerList(
           fetchDataWhenIsUpdateResponse[2].map(({ id, name }) => ({
             value: id,
@@ -217,76 +210,28 @@ export default function ProjectForm() {
       .catch(error => {});
   };
 
-  const [current, setCurrent] = useState(1);
-
-  const handlePageChange = e => setCurrent(e);
-
-  const [searchText, setSearchText] = useState('');
-  const projectTableIdSearchInput = useRef(null);
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-  };
-
-  const handleReset = clearFilters => {
-    clearFilters();
-    setSearchText('');
-  };
-  const getColumnSearchProps = useCallback(
-    dataIndex => ({
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-      }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            ref={projectTableIdSearchInput}
-            placeholder={`Search ${dataIndex}`}
-            value={selectedKeys[0]}
-            onChange={e =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            style={{ width: 188, marginBottom: 8, display: 'block' }}
-          />
-          <Space>
-            <Button
-              type='primary'
-              onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-              icon={<SearchOutlined />}
-              size='small'
-              style={{ width: 90 }}
-            >
-              搜索
-            </Button>
-            <Button
-              onClick={() => handleReset(clearFilters)}
-              size='small'
-              style={{ width: 90 }}
-            >
-              重置
-            </Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: filtered => (
-        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
-      ),
-      onFilter: (value, record) => {
-        return record[dataIndex] === +value;
-      },
-      onFilterDropdownVisibleChange: visible => {
-        if (visible) {
-          setTimeout(() => projectTableIdSearchInput.current.focus(), 100);
-        }
-      },
-      render: text => text,
-    }),
-    []
-  );
-
+  const rightTableColumns = [
+    {
+      title: 'id',
+      dataIndex: 'id',
+      align: 'center',
+      width: 50,
+    },
+    {
+      title: '项目描述',
+      dataIndex: 'description',
+      align: 'center',
+      width: 240,
+      render: input => input || 0,
+    },
+    {
+      title: '所属病症',
+      dataIndex: 'cancer',
+      align: 'center',
+      width: 120,
+      render: input => input.name || 0,
+    },
+  ];
   const tableColumns = useMemo(() => {
     if (isUpdate === null) return [];
     if (isUpdate) {
@@ -300,7 +245,6 @@ export default function ProjectForm() {
             return prevId.id - nextId.id;
           },
           sortDirections: ['descend', 'ascend'],
-          ...getColumnSearchProps('id'),
         },
         {
           title: '项目描述',
@@ -350,15 +294,11 @@ export default function ProjectForm() {
         },
       ];
     }
-  }, [cancerList, isUpdate, getColumnSearchProps]);
+  }, [cancerList, isUpdate]);
 
-  const rowSelection = useMemo(
-    () => ({
-      selectedRowKeys,
-      onChange: selected => setSelectedRowKeys(selected),
-    }),
-    [selectedRowKeys]
-  );
+  const onChange = nextTargetKeys => {
+    setSelectedRowKeys(nextTargetKeys);
+  };
   return (
     <div className='doctor-form-layer'>
       {formInitialData && (
@@ -402,21 +342,21 @@ export default function ProjectForm() {
           </Item>
           {projectList.length > 0 && (
             <Item label='负责项目' name='project_ids' wrapperCol={{ span: 16 }}>
-              <Table
-                rowKey='id'
-                bordered
-                rowSelection={rowSelection}
-                columns={tableColumns}
-                dataSource={projectList || []}
-                className='table'
-                pagination={{
-                  current: current,
-                  pageSize: 5,
-                  showSizeChanger: false,
-                  hideOnSinglePage: true,
-                  onChange: handlePageChange,
+              <TableTransfer
+                listStyle={{
+                  height: 600,
+                  width: 400,
                 }}
-              ></Table>
+                dataSource={projectList}
+                targetKeys={selectedRowKeys}
+                showSearch
+                onChange={onChange}
+                filterOption={(inputValue, item) =>
+                  (item.id + '').indexOf(inputValue) >= 0
+                }
+                leftColumns={tableColumns}
+                rightColumns={rightTableColumns}
+              />
             </Item>
           )}
           <Item wrapperCol={{ span: 24 }} className='center'>
