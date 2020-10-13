@@ -33,6 +33,17 @@ const makeTableColumns = (
     title: '管理员',
     dataIndex: 'isAdmin',
     align: 'center',
+    filters: [
+      {
+        text: '管理员',
+        value: true,
+      },
+      {
+        text: '非管理员',
+        value: false,
+      },
+    ],
+    onFilter: (condition, record) => record.isAdmin === condition,
     render: input =>
       input ? <Tag color='success'>是</Tag> : <Tag color='default'>否</Tag>,
   },
@@ -98,27 +109,27 @@ const filterFormConfig = [
     isFullMatch: false,
     value: '',
   },
-  {
-    key: 'isAdmin',
-    defaultValue: '',
-    isFullMatch: true,
-    value: '',
-    placeholder: '请选择医生类别',
-    list: [
-      {
-        id: '',
-        name: '全部',
-      },
-      {
-        id: true,
-        name: '管理员',
-      },
-      {
-        id: false,
-        name: '非管理员',
-      },
-    ],
-  },
+  // {
+  //   key: 'isAdmin',
+  //   defaultValue: '',
+  //   isFullMatch: true,
+  //   value: '',
+  //   placeholder: '请选择医生类别',
+  //   list: [
+  //     {
+  //       id: '',
+  //       name: '全部',
+  //     },
+  //     {
+  //       id: true,
+  //       name: '管理员',
+  //     },
+  //     {
+  //       id: false,
+  //       name: '非管理员',
+  //     },
+  //   ],
+  // },
 ];
 
 const doctorListConfig = {
@@ -294,9 +305,9 @@ export default function Dashboard() {
         pagination={{
           current: current,
           pageSize: 10,
-          total: doctorList.total,
+          // total: doctorList.total,
           showSizeChanger: false,
-          hideOnSinglePage: true,
+          hideOnSinglePage: false,
           onChange: handlePageChange,
         }}
       ></Table>
