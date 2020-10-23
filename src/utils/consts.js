@@ -1,3 +1,6 @@
+import React from 'react';
+import { Tag } from 'antd';
+
 export const SPECIAL_REQUEST_URL = '/api';
 
 export const ROLE_USER = 'ROLE_USER';
@@ -27,6 +30,27 @@ export const PROCESS_CONFIG = [
     value: 1,
   },
 ];
+
+export const USER_ROLE_CONFIG = [
+  {
+    value: 4,
+    text: '管理员',
+  },
+  {
+    value: 2,
+    text: '医生',
+  },
+  {
+    value: 5,
+    text: '院长',
+  },
+];
+
+export const ROLE_TAG_CONFIG = {
+  4: <Tag color='blue'>管理员</Tag>,
+  2: <Tag color='green'>医生</Tag>,
+  5: <Tag color='purple'>院长</Tag>,
+};
 
 export const ProjectfilterFormConfig = [
   {

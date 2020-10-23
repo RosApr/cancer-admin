@@ -6,6 +6,7 @@ import ListFilterForm from '@/components/listFilterForm';
 import { fetchDoctorListApi, delDoctorApi } from '@/api/doctor';
 import { useNavigate, useRequest, useRequestResult } from '@/utils/requestHook';
 import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
+import { USER_ROLE_CONFIG, ROLE_TAG_CONFIG } from '@/utils/consts';
 import './index.scss';
 
 const makeTableColumns = (
@@ -31,21 +32,11 @@ const makeTableColumns = (
   },
   {
     title: '管理员',
-    dataIndex: 'isAdmin',
+    dataIndex: 'role_id',
     align: 'center',
-    filters: [
-      {
-        text: '管理员',
-        value: true,
-      },
-      {
-        text: '非管理员',
-        value: false,
-      },
-    ],
-    onFilter: (condition, record) => record.isAdmin === condition,
-    render: input =>
-      input ? <Tag color='success'>是</Tag> : <Tag color='default'>否</Tag>,
+    filters: USER_ROLE_CONFIG,
+    onFilter: (condition, record) => record.role_id === condition,
+    render: input => ROLE_TAG_CONFIG[input],
   },
   {
     title: '联系电话',

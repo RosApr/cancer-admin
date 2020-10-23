@@ -13,6 +13,7 @@ import {
   Tag,
   Table,
   Space,
+  Select,
 } from 'antd';
 import { fetchProjectListApi } from '@/api/project';
 import {
@@ -26,19 +27,23 @@ import {
   useFetchDataOnMount,
   useRequest,
 } from '@/utils/requestHook';
-import { FORM_ITEM_LAYOUT, fetchProjectDefaultParams } from '@/utils/consts';
+import {
+  FORM_ITEM_LAYOUT,
+  fetchProjectDefaultParams,
+  USER_ROLE_CONFIG,
+} from '@/utils/consts';
 import { useReturnCurrentFormStatus } from '@/utils/requestHook';
 import './index.scss';
 
 const { Item } = Form;
-
+const { Option } = Select;
 const initialFormData = {
   name: '',
   position: '',
   telphone: '',
   mobile_phone: '',
   visit_time: '',
-  isAdmin: false,
+  role_id: 2,
   isRegister: false,
   projects: [],
 };
@@ -328,8 +333,14 @@ export default function ProjectForm() {
           <Item label='职称' name='position'>
             <Input />
           </Item>
-          <Item label='管理员' name='isAdmin' valuePropName='checked'>
-            <Switch checkedChildren='是' unCheckedChildren='否' />
+          <Item label='管理员' name='role_id'>
+            <Select>
+              {USER_ROLE_CONFIG.map(({ text, value }) => (
+                <Option value={value} key={value}>
+                  {text}
+                </Option>
+              ))}
+            </Select>
           </Item>
           <Item label='联系电话' name='telphone'>
             <Input />

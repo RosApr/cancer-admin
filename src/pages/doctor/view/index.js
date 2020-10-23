@@ -5,6 +5,7 @@ import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { fetchDoctorDetailApi } from '@/api/doctor';
 import { useFetchDataOnMount, useNavigate } from '@/utils/requestHook';
 import DetailItem from '@/components/detailItem';
+import { ROLE_TAG_CONFIG } from '@/utils/consts';
 import './index.scss';
 
 const tableColumns = [
@@ -102,11 +103,7 @@ export default function DoctorView() {
           </DetailItem>
           <DetailItem label='职称'>{responseMemo.position}</DetailItem>
           <DetailItem label='管理员'>
-            {responseMemo.isAdmin ? (
-              <Tag color='success'>是</Tag>
-            ) : (
-              <Tag color='default'>否</Tag>
-            )}
+            {ROLE_TAG_CONFIG[responseMemo.role_id]}
           </DetailItem>
           <DetailItem label='联系电话'>{responseMemo.telphone}</DetailItem>
           <DetailItem label='手机号'>{responseMemo.mobile_phone}</DetailItem>
