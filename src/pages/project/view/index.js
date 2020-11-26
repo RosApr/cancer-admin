@@ -202,6 +202,11 @@ export default function ProjectView() {
         );
       } else {
         _patientList.push(submitPatientResponse);
+        setProjectDetail(prev => ({
+          ...prev,
+          accept_patients_num: prev.accept_patients_num + 1,
+          submit_patients_num: prev.submit_patients_num + 1,
+        }));
       }
       setPatientList(_patientList);
       setShowPatientForm(false);
@@ -252,6 +257,11 @@ export default function ProjectView() {
         _patientList.findIndex(item => item.id === requestData),
         1
       );
+      setProjectDetail(prev => ({
+        ...prev,
+        accept_patients_num: prev.accept_patients_num - 1,
+        submit_patients_num: prev.submit_patients_num - 1,
+      }));
       setPatientList(_patientList);
     },
   });
@@ -290,10 +300,12 @@ export default function ProjectView() {
       {projectDetail && (
         <div>
           <DetailItem itemWidth label='负责医生'>
-            {projectDetail.person_in_charge}
-            <Tag style={{ margin: '0 4px' }} color='blue'>
-              {projectDetail.doctor_position}
-            </Tag>
+            {projectDetail.doctors
+              ? projectDetail.doctors
+                  .map(({ name }) => name)
+                  .join('，')
+                  .replace(/，$/, '')
+              : '等待回填'}
             {projectDetail.doctor_telphone
               ? ` | ${projectDetail.doctor_telphone}`
               : ''}

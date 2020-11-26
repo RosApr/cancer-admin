@@ -31,13 +31,19 @@ const makeTableColumns = (
     align: 'left',
     render: input => input || '等待回填',
   },
-  {
-    title: '负责医生',
-    dataIndex: 'person_in_charge',
-    align: 'center',
-    width: 120,
-    render: input => input || '等待回填',
-  },
+  // {
+  //   title: '负责医生',
+  //   dataIndex: 'doctors',
+  //   align: 'center',
+  //   width: 120,
+  //   render: input =>
+  //     input
+  //       ? input
+  //           .map(({ name }) => name)
+  //           .join('，')
+  //           .replace(/，$/, '')
+  //       : '等待回填',
+  // },
   {
     title: '提交人数',
     dataIndex: 'submit_patients_num',

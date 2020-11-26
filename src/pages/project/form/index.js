@@ -8,6 +8,7 @@ import {
   Tag,
   Switch,
   message as Message,
+  Tooltip,
 } from 'antd';
 import {
   fetchProjectDetailApi,
@@ -36,7 +37,7 @@ const initialFormData = {
   exclusion: '',
   description: '',
   check_criterion: '',
-  person_in_charge: '',
+  doctors: [],
   category_l1: '',
   progress: !!0,
 };
@@ -52,7 +53,7 @@ export default function ProjectForm() {
   const [doctorList, setDoctorList] = useState([]);
 
   const fetchDoctorCallback = useCallback(() => {
-    return fetchDoctorListApi();
+    return fetchDoctorListApi({ role: 2 });
   }, []);
 
   const {
@@ -102,6 +103,9 @@ export default function ProjectForm() {
           2
         ),
         progress: !fetchProjectResponse.progress,
+        doctors: fetchProjectResponse['doctors'].map(
+          item => item.id || item.name
+        ),
       });
     }
 
@@ -118,7 +122,7 @@ export default function ProjectForm() {
       setFormInitialData({
         ...initialFormData,
         category_l1: fetchCancerResponse[0]['name'],
-        person_in_charge: fetchDoctorResponse[0]['name'],
+        doctors: [fetchDoctorResponse[0]['id']],
       });
     }
   }, [
@@ -141,7 +145,9 @@ export default function ProjectForm() {
       // }
       if (isUpdate) {
         try {
-          const checkData = { check_criterion: JSON.parse(check_criterion) };
+          const checkData = {
+            check_criterion: JSON.parse(check_criterion) || {},
+          };
           return Promise.all([
             updateProjectCheckApi(project_id, checkData),
             updateProjectConfigApi(project_id, {
@@ -170,7 +176,7 @@ export default function ProjectForm() {
 
   useEffect(() => {
     if (submitError.status === 1) {
-      Message.success('操作异常！');
+      Message.success(submitError.msg || '操作异常！');
     } else if (submitError.status === 0) {
       Message.success(isUpdate ? '修改成功！' : '添加成功！').then(() => {
         goProjectList();
@@ -184,6 +190,9 @@ export default function ProjectForm() {
       .then(async values => {
         // name field is untouched and not empty or in edit
         // and name equal edit init name
+        if (isUpdate) {
+          delete values.doctors;
+        }
         return submit(params.project_id, values);
       })
       .catch(error => {});
@@ -215,19 +224,30 @@ export default function ProjectForm() {
               </Select>
             </Item>
           )}
+          <Tooltip
+            placement='top'
+            title={isUpdate ? '只可在医生管理页面修改' : '可多选'}
+          >
+            <Item
+              name='doctors'
+              label='负责医生'
+              rules={[{ required: true, message: '请选择负责医生' }]}
+            >
+              <Select disabled={isUpdate} mode='multiple'>
+                {doctorList.map(
+                  ({ name, position, telphone, visit_time, id }) => (
+                    <Option value={id || name} key={id}>
+                      <span className='doctor-name'>{name}</span>
+                      {position && <Tag color='blue'>{position}</Tag>}
+                      {telphone ? ` | ${telphone}` : ''}
+                      {visit_time ? ` |  门诊时间：${visit_time}` : ''}
+                    </Option>
+                  )
+                )}
+              </Select>
+            </Item>
+          </Tooltip>
 
-          <Item name='person_in_charge' label='负责医生'>
-            <Select showSearch>
-              {doctorList.map(({ name, position, telphone, visit_time }) => (
-                <Option value={name} key={name}>
-                  <span className='doctor-name'>{name}</span>
-                  {position && <Tag color='blue'>{position}</Tag>}
-                  {telphone ? ` | ${telphone}` : ''}
-                  {visit_time ? ` |  门诊时间：${visit_time}` : ''}
-                </Option>
-              ))}
-            </Select>
-          </Item>
           {isUpdate && (
             <Item name='progress' label='项目进度' valuePropName='checked'>
               <Switch checkedChildren='正在进行' unCheckedChildren='已结束' />
