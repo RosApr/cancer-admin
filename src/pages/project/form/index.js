@@ -230,8 +230,8 @@ export default function ProjectForm() {
           >
             <Item
               name='doctors'
-              label='负责医生'
-              rules={[{ required: true, message: '请选择负责医生' }]}
+              label='研究医生'
+              rules={[{ required: true, message: '请选择研究医生' }]}
             >
               <Select disabled={isUpdate} mode='multiple'>
                 {doctorList.map(

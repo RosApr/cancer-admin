@@ -32,7 +32,7 @@ const makeTableColumns = (
     render: input => input || '等待回填',
   },
   // {
-  //   title: '负责医生',
+  //   title: '研究医生',
   //   dataIndex: 'doctors',
   //   align: 'center',
   //   width: 120,

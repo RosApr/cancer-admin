@@ -299,7 +299,7 @@ export default function ProjectView() {
     <div className='project-detail-page'>
       {projectDetail && (
         <div>
-          <DetailItem itemWidth label='负责医生'>
+          <DetailItem itemWidth label='研究医生'>
             {projectDetail.doctors
               ? projectDetail.doctors
                   .map(({ name }) => name)
