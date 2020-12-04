@@ -43,6 +43,7 @@ const makeTableColumns = (goEdit = () => {}, del = () => {}) => [
     title: '链接',
     dataIndex: 'url',
     align: 'center',
+    className: 'url-btn',
     render: input => (
       <Tooltip title='点击跳转查看文章详情'>
         <Button href={input} target='_blank' type='link'>
@@ -271,7 +272,7 @@ export default function NewsIndex() {
   const tableColumns = makeTableColumns(fetchNewsDetail, delNews);
 
   return (
-    <div className='dashboard-layer'>
+    <div className='news-layer'>
       {tableFilter && (
         <TableFilterContainer
           left={() => {
