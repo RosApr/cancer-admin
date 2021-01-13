@@ -65,7 +65,7 @@ const cancerListConfig = {
 export default function Dashboard() {
   const { history } = useNavigate();
 
-  const [cancerList, setDoctorList] = useState(() => cancerListConfig);
+  const [cancerList, setCancerList] = useState(() => cancerListConfig);
   const [current, setCurrent] = useState(1);
   const [init, setInit] = useState(false);
 
@@ -75,23 +75,20 @@ export default function Dashboard() {
   });
 
   // fire table filter condition change
-  const handleFilterChange = useCallback(
-    currentFilters => {
-      setTableFilter(prev => {
-        const formatFilters = prev.map(item => {
-          return {
-            ...item,
-            value: currentFilters[item['key']],
-          };
-        });
-        return formatFilters;
+  const handleFilterChange = useCallback(currentFilters => {
+    setTableFilter(prev => {
+      const formatFilters = prev.map(item => {
+        return {
+          ...item,
+          value: currentFilters[item['key']],
+        };
       });
-      setInit(false);
-      setCurrent(1);
-      setDoctorList(cancerListConfig);
-    },
-    [setTableFilter]
-  );
+      return formatFilters;
+    });
+    setInit(false);
+    setCurrent(1);
+    setCancerList(cancerListConfig);
+  }, []);
 
   const fetchDoctorListCallback = useCallback(() => {
     const fetchParams = {
@@ -112,7 +109,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (fetchDoctorListError.status === 0 && fetchDoctorListResponse) {
       const list = fetchDoctorListResponse;
-      setDoctorList({
+      setCancerList({
         list: list,
         total: list.length || 0,
       });
@@ -165,7 +162,7 @@ export default function Dashboard() {
         _cancerList.findIndex(({ id }) => id === requestData),
         1
       );
-      setDoctorList({
+      setCancerList({
         list: _cancerList,
         total: _cancerList.length || 0,
       });

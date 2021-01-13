@@ -18,7 +18,7 @@ import {
   fetchNewsDetailApi,
   addNewsApi,
 } from '@/api/news';
-import { useNavigate, useRequest, useRequestResult } from '@/utils/requestHook';
+import { useRequest, useRequestResult } from '@/utils/requestHook';
 import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
 import { FORM_ITEM_LAYOUT } from '@/utils/consts';
 import './index.scss';
@@ -93,8 +93,6 @@ const newsListConfig = {
 };
 
 export default function NewsIndex() {
-  const { history } = useNavigate();
-
   const [newsList, setNewsList] = useState(() => newsListConfig);
   const [current, setCurrent] = useState(1);
   const [init, setInit] = useState(false);

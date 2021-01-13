@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Input, Select } from 'antd';
+import { Button, DatePicker, Form, Input, Select } from 'antd';
 import './index.scss';
 
 const { Item } = Form;
 const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 const ListFilterForm = ({ config = [], onSearch = () => {} }) => {
   const [initFormValue, setInitFormValue] = useState(null);
@@ -16,6 +17,7 @@ const ListFilterForm = ({ config = [], onSearch = () => {} }) => {
     });
     setInitFormValue(formInitialData);
   }, [config]);
+
   return (
     initFormValue && (
       <Form
@@ -25,26 +27,30 @@ const ListFilterForm = ({ config = [], onSearch = () => {} }) => {
         onFinish={onSearch}
         name='filterConfigForm'
       >
-        {config.map(({ key, list, placeholder }) => (
-          <Item className='' name={key} key={key}>
-            {list ? (
-              <Select
-                className='custom-select'
-                placeholder={placeholder}
-                showSearch
-                dropdownStyle={{ minWidth: 160 }}
-              >
-                {list.map(({ id, name }) => (
-                  <Option value={id} key={id}>
-                    {name}
-                  </Option>
-                ))}
-              </Select>
-            ) : (
-              <Input placeholder={placeholder} />
-            )}
-          </Item>
-        ))}
+        {config.map(
+          ({ key, list, type, placeholder, defaultValue, ...config }) => (
+            <Item className='' name={key} key={key}>
+              {list ? (
+                <Select
+                  className='custom-select'
+                  placeholder={placeholder}
+                  showSearch
+                  dropdownStyle={{ minWidth: 160 }}
+                >
+                  {list.map(({ id, name }) => (
+                    <Option value={id} key={id}>
+                      {name}
+                    </Option>
+                  ))}
+                </Select>
+              ) : type === 'rangePicker' ? (
+                <RangePicker {...config} />
+              ) : (
+                <Input placeholder={placeholder} />
+              )}
+            </Item>
+          )
+        )}
         <Item>
           <Button type='primary' htmlType='submit'>
             搜索

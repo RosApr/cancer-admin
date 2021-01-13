@@ -46,6 +46,22 @@ export const USER_ROLE_CONFIG = [
   },
 ];
 
+export const PATIENT_ACCEPT_CONDITION = [
+  {
+    value: true,
+    text: '已入组',
+  },
+  {
+    value: false,
+    text: '未入组',
+  },
+];
+
+export const PATIENT_ACCEPT_TAG_CONFIG = {
+  true: <Tag color='success'>已入组</Tag>,
+  false: <Tag color='error'>未入组</Tag>,
+};
+
 export const ROLE_TAG_CONFIG = {
   4: <Tag color='blue'>管理员</Tag>,
   2: <Tag color='green'>医生</Tag>,

@@ -2,7 +2,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { Button, Table, Space, Popconfirm, Tag } from 'antd';
 import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
-// import { fetchCancersApi } from '@/api/cancer';
 import { fetchDoctorListApi, delDoctorApi } from '@/api/doctor';
 import { useNavigate, useRequest, useRequestResult } from '@/utils/requestHook';
 import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
@@ -135,49 +134,26 @@ export default function Dashboard() {
   const [current, setCurrent] = useState(1);
   const [init, setInit] = useState(false);
 
-  // const fetchCancerListCallback = useCallback(() => {
-  //   return fetchCancersApi();
-  // }, []);
-  // const {
-  //   response: fetchCancerListResponse,
-  //   error: fetchCancerListError,
-  // } = useFetchDataOnMount(fetchCancerListCallback);
   // init table filter campaign select list
   const [tableFilter, setTableFilter] = useState(() => {
     return initTableFilterConfig(filterFormConfig);
   });
 
-  // useEffect(() => {
-  //   if (fetchCancerListError.status === 0 && fetchCancerListResponse) {
-  //     const cancerSelect = filterFormConfig.filter(
-  //       item => item.key === 'cancer_id'
-  //     )[0];
-  //     cancerSelect['list'] = [
-  //       { id: 0, name: '全部' },
-  //       ...fetchCancerListResponse,
-  //     ];
-  //     setTableFilter(initTableFilterConfig(filterFormConfig));
-  //   }
-  // }, [fetchCancerListResponse, fetchCancerListError]);
-
   // fire table filter condition change
-  const handleFilterChange = useCallback(
-    currentFilters => {
-      setTableFilter(prev => {
-        const formatFilters = prev.map(item => {
-          return {
-            ...item,
-            value: currentFilters[item['key']],
-          };
-        });
-        return formatFilters;
+  const handleFilterChange = useCallback(currentFilters => {
+    setTableFilter(prev => {
+      const formatFilters = prev.map(item => {
+        return {
+          ...item,
+          value: currentFilters[item['key']],
+        };
       });
-      setInit(false);
-      setCurrent(1);
-      setDoctorList(doctorListConfig);
-    },
-    [setTableFilter]
-  );
+      return formatFilters;
+    });
+    setInit(false);
+    setCurrent(1);
+    setDoctorList(doctorListConfig);
+  }, []);
 
   const fetchDoctorListCallback = useCallback(() => {
     const fetchParams = {

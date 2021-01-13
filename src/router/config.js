@@ -4,6 +4,7 @@ import {
   ShopOutlined,
   UnorderedListOutlined,
   OrderedListOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import { ROLE_USER, ROLE_ANONYMOUS } from '@/utils/consts.js';
 
@@ -88,6 +89,14 @@ export const routeMap = [
     state: { meta: '热点文章' },
     isInMenu: !!1,
     menuIcon: OrderedListOutlined,
+  },
+  {
+    path: '/app/patient/index',
+    main: lazy(() => import('@/pages/patient/index')),
+    role: [ROLE_USER],
+    state: { meta: '病人管理' },
+    isInMenu: !!1,
+    menuIcon: TeamOutlined,
   },
   // 登录
   {

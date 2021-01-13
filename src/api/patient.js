@@ -7,6 +7,7 @@ export function updatePatientApi(patient_id, data) {
     data,
   });
 }
+
 export function addPatientApi(data) {
   return request({
     url: `${process.env.REACT_APP_REQUEST_BASE_URL}/doctor/patient`,
@@ -14,9 +15,18 @@ export function addPatientApi(data) {
     data,
   });
 }
+
 export function deletePatientApi(patient_id) {
   return request({
     url: `${process.env.REACT_APP_REQUEST_BASE_URL}/doctor/patient/${patient_id}`,
     method: 'delete',
+  });
+}
+
+export function fetchPatientListApi(params) {
+  return request({
+    url: `${process.env.REACT_APP_REQUEST_BASE_URL}/doctor/patient`,
+    method: 'get',
+    params,
   });
 }
