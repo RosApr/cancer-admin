@@ -10,8 +10,8 @@ import {
   useRequest,
   useRequestResult,
 } from '@/utils/requestHook';
-import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
-import { ProjectfilterFormConfig } from '@/utils/consts';
+import { makeTableFilterParams, initTableFilterConfig } from '@/utils/common';
+import { projectfilterFormConfig } from '@/utils/consts';
 import './index.scss';
 
 const makeTableColumns = (
@@ -31,19 +31,6 @@ const makeTableColumns = (
     align: 'left',
     render: input => input || '等待回填',
   },
-  // {
-  //   title: '研究医生',
-  //   dataIndex: 'doctors',
-  //   align: 'center',
-  //   width: 120,
-  //   render: input =>
-  //     input
-  //       ? input
-  //           .map(({ name }) => name)
-  //           .join('，')
-  //           .replace(/，$/, '')
-  //       : '等待回填',
-  // },
   {
     title: '提交人数',
     dataIndex: 'submit_patients_num',
@@ -108,11 +95,16 @@ export default function ProjectIndex() {
 
   const [projectList, setProjectList] = useState(() => projectListConfig);
   const [current, setCurrent] = useState(1);
-  const [init, setInit] = useState(false);
-
+  const [params, setParams] = useState(() => {
+    return {
+      canFetchData: true,
+      ...makeTableFilterParams(projectfilterFormConfig),
+    };
+  });
   const fetchCancerListCallback = useCallback(() => {
     return fetchCancersApi();
   }, []);
+
   const {
     response: fetchCancerListResponse,
     error: fetchCancerListError,
@@ -122,42 +114,33 @@ export default function ProjectIndex() {
 
   useEffect(() => {
     if (fetchCancerListError.status === 0 && fetchCancerListResponse) {
-      const cancerSelect = ProjectfilterFormConfig.filter(
+      const cancerSelect = projectfilterFormConfig.filter(
         item => item.key === 'cancer_id'
       )[0];
       cancerSelect['list'] = [
         { id: 0, name: '全部' },
         ...fetchCancerListResponse,
       ];
-      setTableFilter(initTableFilterConfig(ProjectfilterFormConfig));
+      setTableFilter(initTableFilterConfig(projectfilterFormConfig));
     }
   }, [fetchCancerListResponse, fetchCancerListError]);
 
   // fire table filter condition change
-  const handleFilterChange = useCallback(
-    currentFilters => {
-      setTableFilter(prev => {
-        const formatFilters = prev.map(item => {
-          return {
-            ...item,
-            value: currentFilters[item['key']],
-          };
-        });
-        return formatFilters;
-      });
-      setInit(false);
-      setCurrent(1);
-      setProjectList(projectListConfig);
-    },
-    [setTableFilter]
-  );
+  const handleFilterChange = useCallback(currentFilters => {
+    setParams(prev => {
+      return {
+        ...prev,
+        ...currentFilters,
+        canFetchData: true,
+      };
+    });
+    setCurrent(1);
+    setProjectList(projectListConfig);
+  }, []);
 
-  const fetchProjectListCallback = useCallback(() => {
-    const fetchParams = {
-      ...makeTableFilterParams(tableFilter),
-    };
-    return fetchProjectListApi(fetchParams);
-  }, [tableFilter]);
+  const fetchProjectListCallback = useCallback(params => {
+    return fetchProjectListApi(params);
+  }, []);
 
   const [
     {
@@ -178,16 +161,16 @@ export default function ProjectIndex() {
     }
   }, [fetchProjectListError, fetchProjectListResponse]);
 
-  const handlePageChange = e => {
-    setCurrent(e);
-  };
-
   useEffect(() => {
-    if (tableFilter && !init) {
-      fetchProjectList();
-      setInit(true);
+    const { canFetchData, ...formData } = params;
+    if (canFetchData) {
+      setParams(prev => ({
+        ...prev,
+        canFetchData: false,
+      }));
+      fetchProjectList(formData);
     }
-  }, [tableFilter, init, fetchProjectList]);
+  }, [fetchProjectList, params]);
 
   const goAdd = () => {
     return history.push(`/app/project/form/add`);
@@ -228,15 +211,11 @@ export default function ProjectIndex() {
         list: _projectList,
         total: _projectList.length || 0,
       });
-      delProjectError.status = 2;
     },
   });
 
-  const del = projectId => {
-    delProject(projectId);
-  };
+  const tableColumns = makeTableColumns(goEdit, goView, delProject);
 
-  const tableColumns = makeTableColumns(goEdit, goView, del);
   return (
     <div className='project-index-layer'>
       {fetchCancerListResponse && tableFilter && (
@@ -244,7 +223,7 @@ export default function ProjectIndex() {
           left={() => {
             return (
               <ListFilterForm
-                config={ProjectfilterFormConfig}
+                config={projectfilterFormConfig}
                 onSearch={handleFilterChange}
               />
             );
@@ -271,7 +250,7 @@ export default function ProjectIndex() {
           total: projectList.total,
           showSizeChanger: false,
           hideOnSinglePage: true,
-          onChange: handlePageChange,
+          onChange: setCurrent,
         }}
       ></Table>
     </div>

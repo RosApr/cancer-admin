@@ -19,8 +19,7 @@ import {
   addNewsApi,
 } from '@/api/news';
 import { useRequest, useRequestResult } from '@/utils/requestHook';
-import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
-import { FORM_ITEM_LAYOUT } from '@/utils/consts';
+import { makeTableFilterParams } from '@/utils/common';
 import './index.scss';
 
 const formInitialData = {
@@ -95,10 +94,14 @@ const newsListConfig = {
 export default function NewsIndex() {
   const [newsList, setNewsList] = useState(() => newsListConfig);
   const [current, setCurrent] = useState(1);
-  const [init, setInit] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalDetail, setModalDetail] = useState(null);
-
+  const [params, setParams] = useState(() => {
+    return {
+      canFetchData: true,
+      ...makeTableFilterParams(filterFormConfig),
+    };
+  });
   const fetchNewsDetailCallback = useCallback(id => {
     return fetchNewsDetailApi(id);
   }, []);
@@ -116,10 +119,10 @@ export default function NewsIndex() {
       fetchNewsDetailResponse &&
       !showModal
     ) {
+      fetchNewsDetailError.status = 2;
       setModalDetail(fetchNewsDetailResponse);
       form.setFieldsValue(fetchNewsDetailResponse);
       setShowModal(true);
-      fetchNewsDetailError.status = 2;
     }
   }, [form, fetchNewsDetailError, fetchNewsDetailResponse, showModal]);
 
@@ -141,8 +144,10 @@ export default function NewsIndex() {
     updateOrAddNews,
   ] = useRequest(updateOrAddNewsCallback);
 
-  useEffect(() => {
-    if (updateOrAddNewsResponse && updateOrAddNewsError.status === 0) {
+  useRequestResult({
+    response: updateOrAddNewsResponse,
+    error: updateOrAddNewsError,
+    cb: () => {
       const _newsList = [...newsList.list];
       setShowModal(false);
       if (modalDetail) {
@@ -158,9 +163,9 @@ export default function NewsIndex() {
         list: _newsList,
         total: _newsList.length || 0,
       });
-      updateOrAddNewsError.status = 2;
-    }
-  }, [modalDetail, updateOrAddNewsResponse, updateOrAddNewsError, newsList]);
+    },
+  });
+
   const submitNews = () => {
     form
       .validateFields()
@@ -169,33 +174,23 @@ export default function NewsIndex() {
       })
       .catch(error => {});
   };
-  // init table filter campaign select list
-  const [tableFilter, setTableFilter] = useState(() => {
-    return initTableFilterConfig(filterFormConfig);
-  });
 
   // fire table filter condition change
   const handleFilterChange = useCallback(currentFilters => {
-    setTableFilter(prev => {
-      const formatFilters = prev.map(item => {
-        return {
-          ...item,
-          value: currentFilters[item['key']],
-        };
-      });
-      return formatFilters;
+    setParams(prev => {
+      return {
+        ...prev,
+        ...currentFilters,
+        canFetchData: true,
+      };
     });
-    setInit(false);
     setCurrent(1);
     setNewsList(newsListConfig);
   }, []);
 
-  const fetchNewsListCallback = useCallback(() => {
-    const fetchParams = {
-      ...makeTableFilterParams(tableFilter),
-    };
-    return fetchNewsListApi(fetchParams);
-  }, [tableFilter]);
+  const fetchNewsListCallback = useCallback(params => {
+    return fetchNewsListApi(params);
+  }, []);
 
   const [
     {
@@ -216,19 +211,16 @@ export default function NewsIndex() {
     }
   }, [fetchNewsListError, fetchNewsListResponse]);
 
-  const handlePageChange = e => {
-    setCurrent(e);
-  };
-
   useEffect(() => {
-    if (tableFilter && !init) {
-      fetchNewsList();
-      setInit(true);
+    const { canFetchData, ...formData } = params;
+    if (canFetchData) {
+      setParams(prev => ({
+        ...prev,
+        canFetchData: false,
+      }));
+      fetchNewsList(formData);
     }
-  }, [tableFilter, init, fetchNewsList]);
-  // const goEdit = newsId => {
-  //   fetchNewsDetail(newsId);
-  // };
+  }, [params, fetchNewsList]);
 
   const delNewsCallback = useCallback(newsId => {
     return delNewsApi(newsId);
@@ -257,7 +249,6 @@ export default function NewsIndex() {
         list: _newsList,
         total: _newsList.length || 0,
       });
-      delNewsError.status = 2;
     },
   });
 
@@ -271,31 +262,29 @@ export default function NewsIndex() {
 
   return (
     <div className='news-layer'>
-      {tableFilter && (
-        <TableFilterContainer
-          left={() => {
-            return (
-              <ListFilterForm
-                config={filterFormConfig}
-                onSearch={handleFilterChange}
-              />
-            );
-          }}
-          right={() => {
-            return (
-              <Button
-                type='primary'
-                onClick={() => {
-                  setModalDetail(null);
-                  setShowModal(true);
-                }}
-              >
-                添加文章
-              </Button>
-            );
-          }}
-        />
-      )}
+      <TableFilterContainer
+        left={() => {
+          return (
+            <ListFilterForm
+              config={filterFormConfig}
+              onSearch={handleFilterChange}
+            />
+          );
+        }}
+        right={() => {
+          return (
+            <Button
+              type='primary'
+              onClick={() => {
+                setModalDetail(null);
+                setShowModal(true);
+              }}
+            >
+              添加文章
+            </Button>
+          );
+        }}
+      />
       <Table
         loading={fetchNewsListLoading}
         rowKey='id'
@@ -309,13 +298,15 @@ export default function NewsIndex() {
           // total: newsList.total,
           showSizeChanger: false,
           hideOnSinglePage: false,
-          onChange: handlePageChange,
+          onChange: setCurrent,
         }}
       ></Table>
       <Modal
         title={`${modalDetail ? '编辑' : '添加'}文章`}
         visible={showModal}
         onOk={submitNews}
+        width={600}
+        forceRender
         confirmLoading={updateOrAddNewsLoading}
         onCancel={() => {
           setModalDetail(null);
@@ -326,7 +317,8 @@ export default function NewsIndex() {
           name='Form'
           form={form}
           labelAlign='right'
-          {...FORM_ITEM_LAYOUT}
+          wrapperCol={{ span: 21 }}
+          labelCol={{ span: 3 }}
           initialValues={formInitialData}
         >
           <Form.Item

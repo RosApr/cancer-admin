@@ -142,18 +142,13 @@ export default function Dashboard() {
     }
   }, [fetchPatientListError, fetchPatientListResponse]);
 
-  const handlePageChange = page => {
-    setCurrent(page);
-  };
-
   useEffect(() => {
-    if (params.canFetchData) {
+    const { canFetchData, ...formData } = params;
+    if (canFetchData) {
       setParams(prev => ({
         ...prev,
         canFetchData: false,
       }));
-      const formData = { ...params };
-      delete formData.canFetchData;
       fetchPatientList(formData);
     }
   }, [params, fetchPatientList]);
@@ -184,7 +179,7 @@ export default function Dashboard() {
           pageSize: 10,
           showSizeChanger: false,
           hideOnSinglePage: true,
-          onChange: handlePageChange,
+          onChange: setCurrent,
         }}
       ></Table>
     </div>

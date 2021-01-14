@@ -68,7 +68,7 @@ export const ROLE_TAG_CONFIG = {
   5: <Tag color='purple'>院长</Tag>,
 };
 
-export const ProjectfilterFormConfig = [
+export const projectfilterFormConfig = [
   {
     key: 'cancer_id',
     list: [],
@@ -100,7 +100,7 @@ export const ProjectfilterFormConfig = [
   },
 ];
 
-export const fetchProjectDefaultParams = ProjectfilterFormConfig.reduce(
+export const fetchProjectDefaultParams = projectfilterFormConfig.reduce(
   (result, current) => {
     result[current['key']] = current.value;
     return result;

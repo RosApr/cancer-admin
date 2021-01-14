@@ -4,7 +4,7 @@ import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
 import { fetchCancersApi, delCancerApi } from '@/api/cancer';
 import { useNavigate, useRequest, useRequestResult } from '@/utils/requestHook';
-import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
+import { makeTableFilterParams } from '@/utils/common';
 import './index.scss';
 
 const makeTableColumns = (
@@ -67,35 +67,30 @@ export default function Dashboard() {
 
   const [cancerList, setCancerList] = useState(() => cancerListConfig);
   const [current, setCurrent] = useState(1);
-  const [init, setInit] = useState(false);
-
-  // init table filter campaign select list
-  const [tableFilter, setTableFilter] = useState(() => {
-    return initTableFilterConfig(filterFormConfig);
+  const [params, setParams] = useState(() => {
+    return {
+      canFetchData: true,
+      ...makeTableFilterParams(filterFormConfig),
+    };
   });
 
   // fire table filter condition change
   const handleFilterChange = useCallback(currentFilters => {
-    setTableFilter(prev => {
-      const formatFilters = prev.map(item => {
-        return {
-          ...item,
-          value: currentFilters[item['key']],
-        };
-      });
-      return formatFilters;
+    setParams(prev => {
+      return {
+        ...prev,
+        ...currentFilters,
+        canFetchData: true,
+      };
     });
-    setInit(false);
+
     setCurrent(1);
     setCancerList(cancerListConfig);
   }, []);
 
-  const fetchDoctorListCallback = useCallback(() => {
-    const fetchParams = {
-      ...makeTableFilterParams(tableFilter),
-    };
-    return fetchCancersApi(fetchParams);
-  }, [tableFilter]);
+  const fetchDoctorListCallback = useCallback(params => {
+    return fetchCancersApi(params);
+  }, []);
 
   const [
     {
@@ -116,16 +111,16 @@ export default function Dashboard() {
     }
   }, [fetchDoctorListError, fetchDoctorListResponse]);
 
-  const handlePageChange = e => {
-    setCurrent(e);
-  };
-
   useEffect(() => {
-    if (tableFilter && !init) {
-      fetchDoctorList();
-      setInit(true);
+    const { canFetchData, ...formData } = params;
+    if (canFetchData) {
+      setParams(prev => ({
+        ...prev,
+        canFetchData: false,
+      }));
+      fetchDoctorList(formData);
     }
-  }, [tableFilter, init, fetchDoctorList]);
+  }, [params, fetchDoctorList]);
 
   const goAdd = () => {
     return history.push(`/app/cancer/form/add`);
@@ -166,37 +161,30 @@ export default function Dashboard() {
         list: _cancerList,
         total: _cancerList.length || 0,
       });
-      delDoctorError.status = 2;
     },
   });
 
-  const del = cancerId => {
-    delDoctor(cancerId);
-  };
-
   // const tableColumns = makeTableColumns(goEdit, goView, del);
-  const tableColumns = makeTableColumns(goView, goEdit, del);
+  const tableColumns = makeTableColumns(goView, goEdit, delDoctor);
   return (
     <div className='cancer-manage-layer'>
-      {tableFilter && (
-        <TableFilterContainer
-          left={() => {
-            return (
-              <ListFilterForm
-                config={filterFormConfig}
-                onSearch={handleFilterChange}
-              />
-            );
-          }}
-          right={() => {
-            return (
-              <Button type='primary' onClick={goAdd}>
-                添加癌症
-              </Button>
-            );
-          }}
-        />
-      )}
+      <TableFilterContainer
+        left={() => {
+          return (
+            <ListFilterForm
+              config={filterFormConfig}
+              onSearch={handleFilterChange}
+            />
+          );
+        }}
+        right={() => {
+          return (
+            <Button type='primary' onClick={goAdd}>
+              添加癌症
+            </Button>
+          );
+        }}
+      />
       <Table
         loading={fetchDoctorListLoading}
         rowKey='id'
@@ -210,7 +198,7 @@ export default function Dashboard() {
           total: cancerList.total,
           showSizeChanger: false,
           hideOnSinglePage: true,
-          onChange: handlePageChange,
+          onChange: setCurrent,
         }}
       ></Table>
     </div>
