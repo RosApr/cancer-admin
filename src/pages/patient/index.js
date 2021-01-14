@@ -49,7 +49,7 @@ const makeTableColumns = () => [
   },
 ];
 
-const today = +moment().endOf('day');
+const today = moment().endOf('day');
 
 const filterFormConfig = [
   {
@@ -67,7 +67,7 @@ const filterFormConfig = [
     type: 'rangePicker',
     value: null,
     disabledDate: current => {
-      return current && +current > today;
+      return current && current > today;
     },
     format: 'YYYY-MM-DD',
   },
