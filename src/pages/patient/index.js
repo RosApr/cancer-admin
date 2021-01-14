@@ -1,9 +1,9 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Table } from 'antd';
+import { Table, Button } from 'antd';
 import moment from 'moment';
 import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
-import { fetchPatientListApi } from '@/api/patient';
+import { fetchPatientListApi, fetchPatientDetailApi } from '@/api/patient';
 import { useRequest } from '@/utils/requestHook';
 import { makeTableFilterParams } from '@/utils/common';
 import {
@@ -12,7 +12,7 @@ import {
 } from '@/utils/consts';
 import './index.scss';
 
-const makeTableColumns = () => [
+const makeTableColumns = (handleShowPatientClickBtn = () => {}) => [
   {
     title: 'id',
     dataIndex: 'id',
@@ -46,6 +46,17 @@ const makeTableColumns = () => [
     title: '更新时间',
     dataIndex: 'update_time',
     align: 'center',
+  },
+  {
+    title: '操作',
+    dataIndex: 'id',
+    render: input => {
+      return (
+        <Button type='primary' onClick={() => handleShowPatientClickBtn(input)}>
+          查看
+        </Button>
+      );
+    },
   },
 ];
 
@@ -119,6 +130,41 @@ export default function Dashboard() {
     setPatientList(patientListConfig);
   }, []);
 
+  const fetchPatientDetailCallback = useCallback(patientId => {
+    return fetchPatientDetailApi(patientId);
+  }, []);
+
+  const [
+    {
+      error: fetchPatientDetailError,
+      response: fetchPatientDetailResponse,
+      isLoading: fetchPatientDetailLoading,
+    },
+    fetchPatientDetail,
+  ] = useRequest(fetchPatientDetailCallback);
+
+  useEffect(() => {
+    if (fetchPatientDetailError.status === 0 && fetchPatientDetailResponse) {
+      // todo
+    }
+  }, [fetchPatientDetailError, fetchPatientDetailResponse]);
+
+  const handleShowPatientDetail = useCallback(
+    patientId => {
+      const currentPatientConfig = patientList.list.find(
+        item => item.id === patientId
+      );
+      const isAlreadyFetchDetail = currentPatientConfig.hasOwnProperty(
+        '_detail'
+      );
+      if (isAlreadyFetchDetail) {
+        console.log(currentPatientConfig);
+      } else {
+        fetchPatientDetail(patientId);
+      }
+    },
+    [patientList, fetchPatientDetail]
+  );
   const fetchPatientListCallback = useCallback(params => {
     return fetchPatientListApi(params);
   }, []);
@@ -153,7 +199,7 @@ export default function Dashboard() {
     }
   }, [params, fetchPatientList]);
 
-  const tableColumns = makeTableColumns();
+  const tableColumns = makeTableColumns(handleShowPatientDetail);
 
   return (
     <div className='patient-manage-layer'>

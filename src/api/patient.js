@@ -30,3 +30,10 @@ export function fetchPatientListApi(params) {
     params,
   });
 }
+
+export function fetchPatientDetailApi(patient_id) {
+  return request({
+    url: `${process.env.REACT_APP_REQUEST_BASE_URL}/doctor/patient/${patient_id}`,
+    method: 'get',
+  });
+}
