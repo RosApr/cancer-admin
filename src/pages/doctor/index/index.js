@@ -1,11 +1,15 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Button, Table, Space, Popconfirm, Tag } from 'antd';
+import { Button, Table, Space, Popconfirm } from 'antd';
 import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
 import { fetchDoctorListApi, delDoctorApi } from '@/api/doctor';
 import { useNavigate, useRequest, useRequestResult } from '@/utils/requestHook';
 import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
-import { USER_ROLE_CONFIG, ROLE_TAG_CONFIG } from '@/utils/consts';
+import {
+  WECHAT_REGISTER_TAG_CONFIG,
+  USER_ROLE_CONFIG,
+  ROLE_TAG_CONFIG,
+} from '@/utils/consts';
 import './index.scss';
 
 const makeTableColumns = (
@@ -57,12 +61,7 @@ const makeTableColumns = (
     dataIndex: 'isRegister',
     align: 'center',
     width: 150,
-    render: input =>
-      input ? (
-        <Tag color='success'>已绑定</Tag>
-      ) : (
-        <Tag color='error'>未绑定</Tag>
-      ),
+    render: input => WECHAT_REGISTER_TAG_CONFIG[input],
   },
 
   {
@@ -235,12 +234,7 @@ export default function Dashboard() {
     },
   });
 
-  const del = doctorId => {
-    delDoctor(doctorId);
-  };
-
-  // const tableColumns = makeTableColumns(goEdit, goView, del);
-  const tableColumns = makeTableColumns(goView, goEdit, del);
+  const tableColumns = makeTableColumns(goView, goEdit, delDoctor);
   return (
     <div className='dashboard-layer'>
       {tableFilter && (

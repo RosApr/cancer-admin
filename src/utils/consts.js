@@ -62,6 +62,11 @@ export const PATIENT_ACCEPT_TAG_CONFIG = {
   false: <Tag color='error'>未入组</Tag>,
 };
 
+export const WECHAT_REGISTER_TAG_CONFIG = {
+  true: <Tag color='success'>已绑定</Tag>,
+  false: <Tag color='error'>未绑定</Tag>,
+};
+
 export const ROLE_TAG_CONFIG = {
   4: <Tag color='blue'>管理员</Tag>,
   2: <Tag color='green'>医生</Tag>,

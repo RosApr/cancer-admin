@@ -2,4 +2,7 @@
   .table {
     margin-top: 40px;
   }
+  tr.ant-table-expanded-row .ant-descriptions-view table {
+    width: 100%;
+  }
 }

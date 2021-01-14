@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Table, Button } from 'antd';
+import { Table, Button, Descriptions } from 'antd';
 import moment from 'moment';
 import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
@@ -9,6 +9,7 @@ import { makeTableFilterParams } from '@/utils/common';
 import {
   PATIENT_ACCEPT_TAG_CONFIG,
   PATIENT_ACCEPT_CONDITION,
+  WECHAT_REGISTER_TAG_CONFIG,
 } from '@/utils/consts';
 import './index.scss';
 
@@ -106,6 +107,7 @@ const formatParams = (params = {}) => {
 export default function Dashboard() {
   const [patientList, setPatientList] = useState(() => patientListConfig);
   const [current, setCurrent] = useState(1);
+  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
   const [params, setParams] = useState(() => {
     const filterParams = makeTableFilterParams(filterFormConfig);
     const _params = formatParams(filterParams);
@@ -138,7 +140,7 @@ export default function Dashboard() {
     {
       error: fetchPatientDetailError,
       response: fetchPatientDetailResponse,
-      isLoading: fetchPatientDetailLoading,
+      requestData: fetchPatientDetailRequestData,
     },
     fetchPatientDetail,
   ] = useRequest(fetchPatientDetailCallback);
@@ -146,25 +148,43 @@ export default function Dashboard() {
   useEffect(() => {
     if (fetchPatientDetailError.status === 0 && fetchPatientDetailResponse) {
       // todo
+      const _list = [...patientList.list];
+      const currentPatientConfig = _list.find(
+        item => item.id === fetchPatientDetailRequestData
+      );
+      currentPatientConfig['_detail'] = fetchPatientDetailResponse;
+      setPatientList(prev => ({
+        ...prev,
+        list: _list,
+      }));
+      fetchPatientDetailError.status = 2;
     }
-  }, [fetchPatientDetailError, fetchPatientDetailResponse]);
+  }, [
+    patientList,
+    fetchPatientDetailError,
+    fetchPatientDetailResponse,
+    fetchPatientDetailRequestData,
+  ]);
 
-  const handleShowPatientDetail = useCallback(
-    patientId => {
-      const currentPatientConfig = patientList.list.find(
-        item => item.id === patientId
-      );
-      const isAlreadyFetchDetail = currentPatientConfig.hasOwnProperty(
-        '_detail'
-      );
-      if (isAlreadyFetchDetail) {
-        console.log(currentPatientConfig);
+  const handleShowPatientDetail = patientId => {
+    const currentPatientConfig = patientList.list.find(
+      item => item.id === patientId
+    );
+    const isAlreadyFetchDetail = currentPatientConfig.hasOwnProperty('_detail');
+    let _expandedRowKeys = [...expandedRowKeys];
+    if (isAlreadyFetchDetail) {
+      const index = _expandedRowKeys.findIndex(item => item === patientId);
+      if (index >= 0) {
+        _expandedRowKeys.splice(index, 1);
       } else {
-        fetchPatientDetail(patientId);
+        _expandedRowKeys = [..._expandedRowKeys, patientId];
       }
-    },
-    [patientList, fetchPatientDetail]
-  );
+    } else {
+      _expandedRowKeys = [..._expandedRowKeys, patientId];
+      fetchPatientDetail(patientId);
+    }
+    setExpandedRowKeys(_expandedRowKeys);
+  };
   const fetchPatientListCallback = useCallback(params => {
     return fetchPatientListApi(params);
   }, []);
@@ -200,7 +220,7 @@ export default function Dashboard() {
   }, [params, fetchPatientList]);
 
   const tableColumns = makeTableColumns(handleShowPatientDetail);
-
+  console.log(patientList.list);
   return (
     <div className='patient-manage-layer'>
       <TableFilterContainer
@@ -220,6 +240,49 @@ export default function Dashboard() {
         columns={tableColumns}
         dataSource={patientList.list}
         className='table'
+        expandable={{
+          expandedRowKeys: expandedRowKeys,
+          expandIconColumnIndex: -1,
+          rowExpandable: record => record.hasOwnProperty('_detail'),
+          expandedRowRender: record => {
+            const {
+              _detail: {
+                id_card = '',
+                bank_address = '',
+                bank_card_num = '',
+                bank_name = '',
+                exit_time = '',
+                isRegisterWechat = false,
+                project_id = '',
+              },
+            } = record;
+            return (
+              <Descriptions style={{ width: '100%' }}>
+                <Descriptions.Item label='身份证号'>
+                  {id_card}
+                </Descriptions.Item>
+                <Descriptions.Item label='银行名称'>
+                  {bank_name}
+                </Descriptions.Item>
+                <Descriptions.Item label='开户行地址'>
+                  {bank_address}
+                </Descriptions.Item>
+                <Descriptions.Item label='银行卡号'>
+                  {bank_card_num}
+                </Descriptions.Item>
+                <Descriptions.Item label='微信绑定'>
+                  {WECHAT_REGISTER_TAG_CONFIG[isRegisterWechat]}
+                </Descriptions.Item>
+                <Descriptions.Item label='项目ID'>
+                  {project_id}
+                </Descriptions.Item>
+                <Descriptions.Item label='出组时间'>
+                  {exit_time}
+                </Descriptions.Item>
+              </Descriptions>
+            );
+          },
+        }}
         pagination={{
           current: current,
           pageSize: 10,
