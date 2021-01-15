@@ -60,7 +60,7 @@ const makeTableColumns = (
           type={`${expandedRowKeys.includes(input) ? 'default' : 'primary'}`}
           onClick={() => handleShowPatientClickBtn(input)}
         >
-          {expandedRowKeys.includes(input) ? '收起' : '查看'}
+          {expandedRowKeys.includes(input) ? '收起' : '查看入组详情'}
         </Button>
       );
     },
