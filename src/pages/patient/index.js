@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Table, Button, Descriptions } from 'antd';
+import { Table, Button, Descriptions, Row, Col } from 'antd';
 import moment from 'moment';
 import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
@@ -17,11 +17,6 @@ const makeTableColumns = (
   handleShowPatientClickBtn = () => {},
   expandedRowKeys = []
 ) => [
-  {
-    title: 'id',
-    dataIndex: 'id',
-    align: 'center',
-  },
   {
     title: '名称',
     dataIndex: 'name',
@@ -47,6 +42,23 @@ const makeTableColumns = (
     align: 'center',
   },
   {
+    title: '申请项目',
+    dataIndex: 'submit_projects',
+    align: 'center',
+    render: input => {
+      return input ? (
+        <div>
+          {input.map(({ id, description }) => (
+            <Row>
+              <Col>项目ID：{id}</Col>
+              <Col>项目描述：{description}</Col>
+            </Row>
+          ))}
+        </div>
+      ) : null;
+    },
+  },
+  {
     title: '更新时间',
     dataIndex: 'update_time',
     align: 'center',
@@ -54,14 +66,16 @@ const makeTableColumns = (
   {
     title: '操作',
     dataIndex: 'id',
-    render: input => {
+    render: (input, { isAccepted }) => {
       return (
-        <Button
-          type={`${expandedRowKeys.includes(input) ? 'default' : 'primary'}`}
-          onClick={() => handleShowPatientClickBtn(input)}
-        >
-          {expandedRowKeys.includes(input) ? '收起' : '查看入组详情'}
-        </Button>
+        isAccepted && (
+          <Button
+            type={`${expandedRowKeys.includes(input) ? 'default' : 'primary'}`}
+            onClick={() => handleShowPatientClickBtn(input)}
+          >
+            {expandedRowKeys.includes(input) ? '收起' : '查看入组详情'}
+          </Button>
+        )
       );
     },
   },
