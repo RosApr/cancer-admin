@@ -110,7 +110,7 @@ const formatParams = (params = {}) => {
   return formatParams;
 };
 
-export default function Dashboard() {
+export default function PatientList() {
   const [patientList, setPatientList] = useState(() => patientListConfig);
   const [current, setCurrent] = useState(1);
   const [expandedRowKeys, setExpandedRowKeys] = useState([]);

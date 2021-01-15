@@ -4,7 +4,7 @@ import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
 import { fetchDoctorListApi, delDoctorApi } from '@/api/doctor';
 import { useNavigate, useRequest, useRequestResult } from '@/utils/requestHook';
-import { initTableFilterConfig, makeTableFilterParams } from '@/utils/common';
+import { makeTableFilterParams } from '@/utils/common';
 import {
   WECHAT_REGISTER_TAG_CONFIG,
   USER_ROLE_CONFIG,
@@ -126,40 +126,34 @@ const doctorListConfig = {
   total: 0,
 };
 
-export default function Dashboard() {
+export default function DoctorList() {
   const { history } = useNavigate();
 
   const [doctorList, setDoctorList] = useState(() => doctorListConfig);
   const [current, setCurrent] = useState(1);
-  const [init, setInit] = useState(false);
-
-  // init table filter campaign select list
-  const [tableFilter, setTableFilter] = useState(() => {
-    return initTableFilterConfig(filterFormConfig);
+  const [params, setParams] = useState(() => {
+    return {
+      canFetchData: true,
+      ...makeTableFilterParams(filterFormConfig),
+    };
   });
 
   // fire table filter condition change
   const handleFilterChange = useCallback(currentFilters => {
-    setTableFilter(prev => {
-      const formatFilters = prev.map(item => {
-        return {
-          ...item,
-          value: currentFilters[item['key']],
-        };
-      });
-      return formatFilters;
+    setParams(prev => {
+      return {
+        ...prev,
+        ...currentFilters,
+        canFetchData: true,
+      };
     });
-    setInit(false);
     setCurrent(1);
     setDoctorList(doctorListConfig);
   }, []);
 
-  const fetchDoctorListCallback = useCallback(() => {
-    const fetchParams = {
-      ...makeTableFilterParams(tableFilter),
-    };
-    return fetchDoctorListApi(fetchParams);
-  }, [tableFilter]);
+  const fetchDoctorListCallback = useCallback(params => {
+    return fetchDoctorListApi(params);
+  }, []);
 
   const [
     {
@@ -185,11 +179,15 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    if (tableFilter && !init) {
-      fetchDoctorList();
-      setInit(true);
+    const { canFetchData, ...formData } = params;
+    if (canFetchData) {
+      setParams(prev => ({
+        ...prev,
+        canFetchData: false,
+      }));
+      fetchDoctorList(formData);
     }
-  }, [tableFilter, init, fetchDoctorList]);
+  }, [fetchDoctorList, params]);
 
   const goAdd = () => {
     return history.push(`/app/doctor/form/add`);
@@ -230,32 +228,29 @@ export default function Dashboard() {
         list: _doctorList,
         total: _doctorList.length || 0,
       });
-      delDoctorError.status = 2;
     },
   });
 
   const tableColumns = makeTableColumns(goView, goEdit, delDoctor);
   return (
     <div className='dashboard-layer'>
-      {tableFilter && (
-        <TableFilterContainer
-          left={() => {
-            return (
-              <ListFilterForm
-                config={filterFormConfig}
-                onSearch={handleFilterChange}
-              />
-            );
-          }}
-          right={() => {
-            return (
-              <Button type='primary' onClick={goAdd}>
-                添加医生
-              </Button>
-            );
-          }}
-        />
-      )}
+      <TableFilterContainer
+        left={() => {
+          return (
+            <ListFilterForm
+              config={filterFormConfig}
+              onSearch={handleFilterChange}
+            />
+          );
+        }}
+        right={() => {
+          return (
+            <Button type='primary' onClick={goAdd}>
+              添加医生
+            </Button>
+          );
+        }}
+      />
       <Table
         loading={fetchDoctorListLoading}
         rowKey='id'
