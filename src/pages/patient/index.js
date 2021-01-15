@@ -13,7 +13,10 @@ import {
 } from '@/utils/consts';
 import './index.scss';
 
-const makeTableColumns = (handleShowPatientClickBtn = () => {}) => [
+const makeTableColumns = (
+  handleShowPatientClickBtn = () => {},
+  expandedRowKeys = []
+) => [
   {
     title: 'id',
     dataIndex: 'id',
@@ -53,8 +56,11 @@ const makeTableColumns = (handleShowPatientClickBtn = () => {}) => [
     dataIndex: 'id',
     render: input => {
       return (
-        <Button type='primary' onClick={() => handleShowPatientClickBtn(input)}>
-          查看
+        <Button
+          type={`${expandedRowKeys.includes(input) ? 'default' : 'primary'}`}
+          onClick={() => handleShowPatientClickBtn(input)}
+        >
+          {expandedRowKeys.includes(input) ? '收起' : '查看'}
         </Button>
       );
     },
@@ -219,8 +225,11 @@ export default function Dashboard() {
     }
   }, [params, fetchPatientList]);
 
-  const tableColumns = makeTableColumns(handleShowPatientDetail);
-  console.log(patientList.list);
+  const tableColumns = makeTableColumns(
+    handleShowPatientDetail,
+    expandedRowKeys
+  );
+
   return (
     <div className='patient-manage-layer'>
       <TableFilterContainer
@@ -257,7 +266,7 @@ export default function Dashboard() {
               },
             } = record;
             return (
-              <Descriptions style={{ width: '100%' }}>
+              <Descriptions style={{ marginLeft: '10%' }}>
                 <Descriptions.Item label='身份证号'>
                   {id_card}
                 </Descriptions.Item>
