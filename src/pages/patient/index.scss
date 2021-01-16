@@ -5,4 +5,10 @@
   tr.ant-table-expanded-row .ant-descriptions-view table {
     width: 100%;
   }
+  .project-list-container {
+    .project-item:not(:last-child) {
+      margin-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+  }
 }

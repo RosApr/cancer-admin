@@ -1,10 +1,10 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Table, Button, Descriptions, Row, Col } from 'antd';
+import { Table, Button, Descriptions, Row, Col, Tooltip } from 'antd';
 import moment from 'moment';
 import TableFilterContainer from '@/components/tableBar';
 import ListFilterForm from '@/components/listFilterForm';
 import { fetchPatientListApi, fetchPatientDetailApi } from '@/api/patient';
-import { useRequest } from '@/utils/requestHook';
+import { useRequest, useNavigate } from '@/utils/requestHook';
 import { makeTableFilterParams } from '@/utils/common';
 import {
   PATIENT_ACCEPT_TAG_CONFIG,
@@ -15,7 +15,8 @@ import './index.scss';
 
 const makeTableColumns = (
   handleShowPatientClickBtn = () => {},
-  expandedRowKeys = []
+  expandedRowKeys = [],
+  goProjectDetail = () => {}
 ) => [
   {
     title: '名称',
@@ -44,14 +45,30 @@ const makeTableColumns = (
   {
     title: '申请项目',
     dataIndex: 'submit_projects',
-    align: 'center',
+    align: 'left',
+    width: 240,
     render: input => {
       return input ? (
-        <div>
-          {input.map(({ id, description }) => (
-            <Row>
-              <Col>项目ID：{id}</Col>
-              <Col>项目描述：{description}</Col>
+        <div className='project-list-container'>
+          <Row className='project-item' align='start' justify='center'>
+            <Col flex='80px'>项目ID</Col>
+            <Col flex='1'>项目描述</Col>
+          </Row>
+          {input.map(({ id, description, cancerId }) => (
+            <Row
+              className='project-item'
+              key={id}
+              align='start'
+              justify='center'
+            >
+              <Col flex='80px'>{id}</Col>
+              <Col flex='1'>
+                <Tooltip title={description} trigger='hover'>
+                  <Button onClick={() => goProjectDetail(id, cancerId)}>
+                    查看项目详情
+                  </Button>
+                </Tooltip>
+              </Col>
             </Row>
           ))}
         </div>
@@ -125,6 +142,7 @@ const formatParams = (params = {}) => {
 };
 
 export default function PatientList() {
+  const { history } = useNavigate();
   const [patientList, setPatientList] = useState(() => patientListConfig);
   const [current, setCurrent] = useState(1);
   const [expandedRowKeys, setExpandedRowKeys] = useState([]);
@@ -239,9 +257,17 @@ export default function PatientList() {
     }
   }, [params, fetchPatientList]);
 
+  const goProjectDetail = useCallback(
+    (projectId, cancerId) => {
+      if (!projectId || !cancerId) return;
+      return history(`/app/project/view/${cancerId}/${projectId}`);
+    },
+    [history]
+  );
   const tableColumns = makeTableColumns(
     handleShowPatientDetail,
-    expandedRowKeys
+    expandedRowKeys,
+    goProjectDetail
   );
 
   return (
