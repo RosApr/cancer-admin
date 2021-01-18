@@ -54,17 +54,19 @@ const makeTableColumns = (
             <Col flex='80px'>项目ID</Col>
             <Col flex='1'>项目描述</Col>
           </Row>
-          {input.map(({ id, description, cancerId }) => (
+          {input.map(({ id: project_id, description, cancer_id }) => (
             <Row
               className='project-item'
-              key={id}
+              key={project_id}
               align='start'
               justify='center'
             >
-              <Col flex='80px'>{id}</Col>
+              <Col flex='80px'>{project_id}</Col>
               <Col flex='1'>
                 <Tooltip title={description} trigger='hover'>
-                  <Button onClick={() => goProjectDetail(id, cancerId)}>
+                  <Button
+                    onClick={() => goProjectDetail(project_id, cancer_id)}
+                  >
                     查看项目详情
                   </Button>
                 </Tooltip>
@@ -83,14 +85,16 @@ const makeTableColumns = (
   {
     title: '操作',
     dataIndex: 'id',
-    render: (input, { isAccepted }) => {
+    render: (project_id, { isAccepted }) => {
       return (
         isAccepted && (
           <Button
-            type={`${expandedRowKeys.includes(input) ? 'default' : 'primary'}`}
-            onClick={() => handleShowPatientClickBtn(input)}
+            type={`${
+              expandedRowKeys.includes(project_id) ? 'default' : 'primary'
+            }`}
+            onClick={() => handleShowPatientClickBtn(project_id)}
           >
-            {expandedRowKeys.includes(input) ? '收起' : '查看入组详情'}
+            {expandedRowKeys.includes(project_id) ? '收起' : '查看入组详情'}
           </Button>
         )
       );
@@ -258,9 +262,9 @@ export default function PatientList() {
   }, [params, fetchPatientList]);
 
   const goProjectDetail = useCallback(
-    (projectId, cancerId) => {
-      if (!projectId || !cancerId) return;
-      return history(`/app/project/view/${cancerId}/${projectId}`);
+    (project_id, cancer_id) => {
+      if (!project_id || !cancer_id) return;
+      return history(`/app/project/view/${cancer_id}/${project_id}`);
     },
     [history]
   );
