@@ -261,13 +261,11 @@ export default function PatientList() {
     }
   }, [params, fetchPatientList]);
 
-  const goProjectDetail = useCallback(
-    (project_id, cancer_id) => {
-      if (!project_id || !cancer_id) return;
-      return history(`/app/project/view/${cancer_id}/${project_id}`);
-    },
-    [history]
-  );
+  const goProjectDetail = (project_id, cancer_id) => {
+    if (!project_id || !cancer_id) return;
+    return history.push(`/app/project/view/${cancer_id}/${project_id}`);
+  };
+
   const tableColumns = makeTableColumns(
     handleShowPatientDetail,
     expandedRowKeys,
