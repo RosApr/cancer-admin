@@ -3,7 +3,7 @@ module.exports = function(app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'https://clinic.jschgcp.cn',
+      target: 'https://www.clinic-ai.cn/',
       changeOrigin: true,
     })
   );
